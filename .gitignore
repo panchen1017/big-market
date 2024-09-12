@@ -39,3 +39,4 @@ build/
 /.idea/
 /data/
 /.idea/
+/docs/dev-ops/mysql/sql/big_market.sql
