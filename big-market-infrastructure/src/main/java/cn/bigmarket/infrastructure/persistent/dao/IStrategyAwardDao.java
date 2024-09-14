@@ -1,6 +1,7 @@
 package cn.bigmarket.infrastructure.persistent.dao;
 
 
+import cn.bigmarket.domain.strategy.model.entity.StrategyAwardEntity;
 import cn.bigmarket.infrastructure.persistent.po.Award;
 import cn.bigmarket.infrastructure.persistent.po.StrategyAward;
 import org.apache.ibatis.annotations.Mapper;
@@ -14,4 +15,6 @@ import java.util.List;
 public interface IStrategyAwardDao {
 
     List<StrategyAward> queryStrategyAwardList();
+
+    List<StrategyAward> queryStrategyAwardListByStrategyID(Long strategyId);
 }
