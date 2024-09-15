@@ -2,6 +2,8 @@ package cn.bigmarket.domain.strategy.repository;
 
 
 import cn.bigmarket.domain.strategy.model.entity.StrategyAwardEntity;
+import cn.bigmarket.domain.strategy.model.entity.StrategyEntity;
+import cn.bigmarket.domain.strategy.model.entity.StrategyRuleEntity;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -13,11 +15,16 @@ import java.util.List;
 public interface IStrategyRepository {
     List<StrategyAwardEntity> queryStrategyAwardList(Long strategyId);
 
-    void storeStrategySearchRateTables(Long strategyId, Integer rateRange, HashMap<Integer, Integer> shufflestrategyAwardSearchRateTables);
+    void storeStrategySearchRateTables(String key, Integer rateRange, HashMap<Integer, Integer> shufflestrategyAwardSearchRateTables);
 
     // 获取rateRange
     int getRateRange(Long strategyId);
 
+    int getRateRange(String key);
 
-    Integer getStrategyAwardAssemble(Long strategyId, int rateKey);
+    Integer getStrategyAwardAssemble(String key, int rateKey);
+
+    StrategyEntity queryStrategyEntityByStrategyId(Long strategyId);
+
+    StrategyRuleEntity queryStrategyRule(Long strategyId, String ruleModel);
 }

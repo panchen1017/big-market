@@ -2,11 +2,18 @@ package cn.bigmarket.infrastructure.persistent.repository;
 
 
 import cn.bigmarket.domain.strategy.model.entity.StrategyAwardEntity;
+import cn.bigmarket.domain.strategy.model.entity.StrategyEntity;
+import cn.bigmarket.domain.strategy.model.entity.StrategyRuleEntity;
 import cn.bigmarket.domain.strategy.repository.IStrategyRepository;
 import cn.bigmarket.infrastructure.persistent.dao.IStrategyAwardDao;
+import cn.bigmarket.infrastructure.persistent.dao.IStrategyDao;
+import cn.bigmarket.infrastructure.persistent.dao.IStrategyRuleDao;
+import cn.bigmarket.infrastructure.persistent.po.Strategy;
 import cn.bigmarket.infrastructure.persistent.po.StrategyAward;
+import cn.bigmarket.infrastructure.persistent.po.StrategyRule;
 import cn.bigmarket.infrastructure.persistent.redis.IRedisService;
 import cn.bigmarket.types.common.Constants;
+import com.zaxxer.hikari.util.SuspendResumeLock;
 import org.redisson.api.RMap;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -26,6 +33,10 @@ public class StrategyRepository implements IStrategyRepository {
     @Resource
     private IStrategyAwardDao strategyAwardDao;
     @Resource
+    private IStrategyDao strategyDao;
+    @Resource
+    private IStrategyRuleDao strategyRuleDao;
+    @Resource
     private IRedisService redisService;
     @Override
     public List<StrategyAwardEntity> queryStrategyAwardList(Long strategyId) {
@@ -40,7 +51,7 @@ public class StrategyRepository implements IStrategyRepository {
         // 通过cacheKey去获取value
         List<StrategyAwardEntity> strategyAwardEntities = redisService.getValue(cacheKey);
 
-        if( null != strategyAwardEntities && !strategyAwardEntities.isEmpty()) return strategyAwardEntities;
+        if(null != strategyAwardEntities && !strategyAwardEntities.isEmpty()) return strategyAwardEntities;
             // 取出来的 既不为null，也不为空时,返回即可
 
         // 如果redis中没有，那么我们去Dao中获取
@@ -65,24 +76,77 @@ public class StrategyRepository implements IStrategyRepository {
     }
 
     @Override
-    public void storeStrategySearchRateTables(Long strategyId, Integer rateRange, HashMap<Integer, Integer> shufflestrategyAwardSearchRateTables) {
+    public void storeStrategySearchRateTables(String key, Integer rateRange, HashMap<Integer, Integer> shufflestrategyAwardSearchRateTables) {
         // 1. 存储抽奖策略范围值，如6000，用于生成6000以内的随机数
         // 这里只是去存一个key-value键值对，strategy-6000
-        redisService.setValue(Constants.RedisKey.STRATEGY_RATE_RANGE_KEY + strategyId, rateRange.intValue());
+        redisService.setValue(Constants.RedisKey.STRATEGY_RATE_RANGE_KEY + key, rateRange.intValue());
         // 2. 存储打乱后的 概率查找表
-        RMap<Integer, Integer> map = redisService.getMap(Constants.RedisKey.STRATEGY_RATE_TABLE_KEY + strategyId);
+        RMap<Integer, Integer> map = redisService.getMap(Constants.RedisKey.STRATEGY_RATE_TABLE_KEY + key);
         map.putAll(shufflestrategyAwardSearchRateTables);
     }
 
     @Override
     public int getRateRange(Long strategyId) {
         // 从redis中拿出键值对的 6000
-        return  redisService.getValue(Constants.RedisKey.STRATEGY_RATE_RANGE_KEY + strategyId);
+//        return  redisService.getValue(Constants.RedisKey.STRATEGY_RATE_RANGE_KEY + strategyId);
+        return getRateRange(String.valueOf(strategyId));
     }
 
     @Override
-    public Integer getStrategyAwardAssemble(Long strategyId, int rateKey) {
-        // 直接从map中拿回上面存的数据
-        return redisService.getFromMap(Constants.RedisKey.STRATEGY_RATE_TABLE_KEY + strategyId, rateKey);
+    public int getRateRange(String key) {
+        return redisService.getValue(Constants.RedisKey.STRATEGY_RATE_RANGE_KEY + key);
     }
+
+    @Override
+    public Integer getStrategyAwardAssemble(String key, int rateKey) {
+        // 直接从map中拿回上面存的数据
+        return redisService.getFromMap(Constants.RedisKey.STRATEGY_RATE_TABLE_KEY + key, rateKey);
+    }
+
+    @Override
+    public StrategyEntity queryStrategyEntityByStrategyId(Long strategyId) { // 基本操作都是这些，看看redis有没有，没有去库中找，找到了存redis并返回
+        // 通过strategyId 去获取 策略实体
+        // 首先是 正常的，访问一下redis
+        StrategyEntity strategyEntity = redisService.getValue(Constants.RedisKey.STRATEGY_KEY + strategyId);
+        if(null != strategyEntity) {
+            return strategyEntity;
+        }
+        // 去数据库中查询 策略信息，再转成 策略实体
+        Strategy strategy = strategyDao.queryStrategyByStrategyId(strategyId);
+        StrategyEntity straEntity = StrategyEntity.builder()
+                .strategyId(strategy.getStrategyId())
+                .strategyDesc(strategy.getStrategyDesc())
+                .ruleModels(strategy.getRuleModels())
+                .build();
+        // 存入redis中
+        redisService.setValue(Constants.RedisKey.STRATEGY_KEY + strategyId, straEntity);
+        return straEntity;
+    }
+
+    @Override
+    public StrategyRuleEntity queryStrategyRule(Long strategyId, String ruleModel) {
+        // 通过策略id和规则模式来查找策略规则，然后转为实体并返回
+
+        // 后续做压力测试的时候可以改成 redis 缓存查询先，现在做压测，所以一阶段开发的时候没改
+//        StrategyRuleEntity strategyRuleEn = redisService.getValue("Constants.RedisKey.RULEENTITY" + strategyId);
+//        if(null != strategyRuleEn)
+//            return strategyRuleEn;
+
+        StrategyRule strategyRule = new StrategyRule();
+        strategyRule.setStrategyId(strategyId);
+        strategyRule.setRuleModel(ruleModel);
+        StrategyRule strategyRuleResult = strategyRuleDao.queryStrategyRule(strategyRule);
+        StrategyRuleEntity strategyRuleEntity = StrategyRuleEntity.builder()
+                .strategyId(strategyRuleResult.getStrategyId())
+                .awardId(strategyRuleResult.getAwardId())
+                .ruleType(strategyRuleResult.getRuleType())
+                .ruleModel(strategyRuleResult.getRuleModel())
+                .ruleValue(strategyRuleResult.getRuleValue())
+                .ruleDesc(strategyRuleResult.getRuleDesc())
+                .build();
+//        redisService.setValue("Constants.RedisKey.RULEENTITY" + strategyId, strategyRuleEntity);
+        return strategyRuleEntity;
+    }
+
+
 }

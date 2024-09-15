@@ -7,9 +7,6 @@ package cn.bigmarket.domain.strategy.service.armory;
 public interface IStrategyArmory {
 
     // 组装抽奖策略
-    void assembleLotteryStrategy(Long strategyId);
-
-    // 得到随机奖品
-    Integer getRandomAward(Long strategyId);
+    boolean assembleLotteryStrategy(Long strategyId);
 
 }
