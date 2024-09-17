@@ -14,6 +14,7 @@ import cn.bigmarket.infrastructure.persistent.po.StrategyRule;
 import cn.bigmarket.infrastructure.persistent.redis.IRedisService;
 import cn.bigmarket.types.common.Constants;
 import com.zaxxer.hikari.util.SuspendResumeLock;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RMap;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ import java.util.List;
  * @description 策略装实现，负责初始化策略计算
  */
 @Repository
+@Slf4j
 public class StrategyRepository implements IStrategyRepository {
 
     @Resource
@@ -94,6 +96,7 @@ public class StrategyRepository implements IStrategyRepository {
 
     @Override
     public int getRateRange(String key) {
+        log.info("key:{}",key);
         return redisService.getValue(Constants.RedisKey.STRATEGY_RATE_RANGE_KEY + key);
     }
 
@@ -105,7 +108,7 @@ public class StrategyRepository implements IStrategyRepository {
 
     @Override
     public StrategyEntity queryStrategyEntityByStrategyId(Long strategyId) { // 基本操作都是这些，看看redis有没有，没有去库中找，找到了存redis并返回
-        // 通过strategyId 去获取 策略实体
+        // 通过strategyId 去获取 策略表中的一列数据实体
         // 首先是 正常的，访问一下redis
         StrategyEntity strategyEntity = redisService.getValue(Constants.RedisKey.STRATEGY_KEY + strategyId);
         if(null != strategyEntity) {
@@ -146,6 +149,18 @@ public class StrategyRepository implements IStrategyRepository {
                 .build();
 //        redisService.setValue("Constants.RedisKey.RULEENTITY" + strategyId, strategyRuleEntity);
         return strategyRuleEntity;
+    }
+
+    @Override
+    public String queryStrategyRuleValue(Long strategyId, Integer awardId, String ruleModel) {
+
+        StrategyRule strategyRule = new StrategyRule();
+        strategyRule.setStrategyId(strategyId);
+        strategyRule.setAwardId(awardId);
+        strategyRule.setRuleModel(ruleModel);
+//        redisService.getValue("Constants.RedisKey.RuleValue" + strategyRule);
+        String result = strategyRuleDao.queryStrategyRuleValue(strategyRule);
+        return result;
     }
 
 

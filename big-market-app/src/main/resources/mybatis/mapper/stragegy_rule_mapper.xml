@@ -20,10 +20,32 @@
         from strategy_rule
         limit 10
     </select>
-    <select id="queryStrategyRule" resultMap="dataMap">
+<!--    <select id="queryStrategyRule" resultMap="dataMap">-->
+<!--        select strategy_id, award_id, rule_type, rule_model, rule_value, rule_desc-->
+<!--        from strategy_rule-->
+<!--        where strategy_id = #{strategyId} and rule_model = #{ruleModel}-->
+<!--    </select>-->
+<!--    <select id="queryStrategyRuleValue" resultMap="dataMap">-->
+<!--        select strategy_id, award_id, rule_type, rule_model, rule_value, rule_desc-->
+<!--        from strategy_rule-->
+<!--        where strategy_id = #{strategyId} and rule_model = #{ruleModel} and award_id = #{awardId}-->
+<!--    </select>-->
+
+    <select id="queryStrategyRule" parameterType="cn.bigmarket.infrastructure.persistent.po.StrategyRule" resultMap="dataMap">
         select strategy_id, award_id, rule_type, rule_model, rule_value, rule_desc
         from strategy_rule
         where strategy_id = #{strategyId} and rule_model = #{ruleModel}
     </select>
+
+    <select id="queryStrategyRuleValue" parameterType="cn.bigmarket.infrastructure.persistent.po.StrategyRule" resultType="java.lang.String">
+        select rule_value
+        from strategy_rule
+        where strategy_id = #{strategyId} and rule_model = #{ruleModel}
+        <if test="awardId != null">
+            and award_id = #{awardId}
+        </if>
+    </select>
+
+
 
 </mapper>

@@ -138,6 +138,7 @@ public class StrategyArmoryDispatch implements  IStrategyArmory, IStrategyDispat
         String key = String.valueOf(strategyId).concat("_").concat(ruleWeightValue);
 
         int rateRange = repository.getRateRange(key);
+        log.info("rateRange:{}", rateRange);
         // 通过随机值去查找一下奖品信息
         // 这边去一个随机数，范围就是 0 ~ rateRange
         // SecureRandom 是一种更强大的随机数生成器 ，专为安全场景设计。SecureRandom().nextInt(rateRange)就是给一个 0 ~ 6000 的随机数

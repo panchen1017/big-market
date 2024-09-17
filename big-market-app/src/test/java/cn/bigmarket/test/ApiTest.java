@@ -31,7 +31,7 @@ public class ApiTest {
         map.put(7, 103);
         map.put(8, 103);
         map.put(9, 104);
-        log.info("~~~~~redis测试结果~~~~~:{}", redisService.getFromMap("strategy_id_100001", 9).toString());
+//        log.info("~~~~~redis测试结果~~~~~:{}", redisService.getFromMap("strategy_id_100001", 9).toString());
     }
 
 }

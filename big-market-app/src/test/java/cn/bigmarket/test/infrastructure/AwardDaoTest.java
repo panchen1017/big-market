@@ -49,7 +49,7 @@ public class AwardDaoTest {
 //        log.info("测试结果：{}", JSON.toJSONString(strategies));
 
         List<StrategyAward> strategyAwards = strategyAwardDao.queryStrategyAwardList();
-        log.info("测试结果：{}", JSON.toJSONString(strategyAwards));
+//        log.info("测试结果：{}", JSON.toJSONString(strategyAwards));
 
     }
 }
