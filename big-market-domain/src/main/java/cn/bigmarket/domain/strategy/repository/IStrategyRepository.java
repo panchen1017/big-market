@@ -4,6 +4,8 @@ package cn.bigmarket.domain.strategy.repository;
 import cn.bigmarket.domain.strategy.model.entity.StrategyAwardEntity;
 import cn.bigmarket.domain.strategy.model.entity.StrategyEntity;
 import cn.bigmarket.domain.strategy.model.entity.StrategyRuleEntity;
+import cn.bigmarket.domain.strategy.model.valobj.StrategyAwardRuleModelVO;
+import cn.bigmarket.domain.strategy.model.vo.RuleLogicCheckTypeVO;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -29,4 +31,7 @@ public interface IStrategyRepository {
     StrategyRuleEntity queryStrategyRule(Long strategyId, String ruleModel);
 
     String queryStrategyRuleValue(Long strategyId, Integer awardId, String ruleModel);
+
+
+    StrategyAwardRuleModelVO queryStrategyAwardRuleModel(Long strategyId, Integer awardId);
 }

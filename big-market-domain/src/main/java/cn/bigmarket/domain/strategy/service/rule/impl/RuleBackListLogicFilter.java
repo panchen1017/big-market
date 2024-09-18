@@ -13,7 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-
+/**
+ *  黑名单逻辑处理
+ */
 @Slf4j
 @Component
 @LogicStrategy(logicMode = DefaultLogicFactory.LogicModel.RULE_BLACKLIST)

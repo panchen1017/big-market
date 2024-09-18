@@ -4,6 +4,8 @@ package cn.bigmarket.infrastructure.persistent.repository;
 import cn.bigmarket.domain.strategy.model.entity.StrategyAwardEntity;
 import cn.bigmarket.domain.strategy.model.entity.StrategyEntity;
 import cn.bigmarket.domain.strategy.model.entity.StrategyRuleEntity;
+import cn.bigmarket.domain.strategy.model.valobj.StrategyAwardRuleModelVO;
+import cn.bigmarket.domain.strategy.model.vo.RuleLogicCheckTypeVO;
 import cn.bigmarket.domain.strategy.repository.IStrategyRepository;
 import cn.bigmarket.infrastructure.persistent.dao.IStrategyAwardDao;
 import cn.bigmarket.infrastructure.persistent.dao.IStrategyDao;
@@ -161,6 +163,17 @@ public class StrategyRepository implements IStrategyRepository {
 //        redisService.getValue("Constants.RedisKey.RuleValue" + strategyRule);
         String result = strategyRuleDao.queryStrategyRuleValue(strategyRule);
         return result;
+    }
+
+    @Override
+    public StrategyAwardRuleModelVO queryStrategyAwardRuleModel(Long strategyId, Integer awardId) {
+        // 根据 strategyId 和 awardId
+        StrategyAward strategyAward = new StrategyAward();
+        strategyAward.setStrategyId(strategyId);
+        strategyAward.setAwardId(awardId);
+
+        String ruleModels = strategyAwardDao.queryStrategyAwardRuleModels(strategyAward);
+        return StrategyAwardRuleModelVO.builder().ruleModels(ruleModels).build();
     }
 
 

@@ -14,7 +14,9 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.*;
 
-
+/**
+     * 权重规律逻辑处理
+ */
 @Slf4j
 @Component
 @LogicStrategy(logicMode = DefaultLogicFactory.LogicModel.RULE_WIGHT)

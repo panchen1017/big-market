@@ -30,8 +30,17 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy{
         super(repository, strategyDispatch);
     }
 
+
+
+    // 抽奖前置条件判断
     @Override
     protected RuleActionEntity<RuleActionEntity.RaffleBeforeEntity> doCheckRaffleBeforeLogic(RaffleFactorEntity raffleFactorEntity, String... logics) {
+        // 如果传过来的对应策略id和奖品id的rule_model为空，那么直接放行即可
+        if(logics == null || 0 == logics.length)
+            return RuleActionEntity.<RuleActionEntity.RaffleBeforeEntity>builder()
+                    .code(RuleLogicCheckTypeVO.ALLOW.getCode())
+                    .info(RuleLogicCheckTypeVO.ALLOW.getInfo())
+                    .build();
 
         // 1. 获取规则引擎工厂提供的部分
         Map<String, ILogicFilter<RuleActionEntity.RaffleBeforeEntity>> logicFilterGroup = logicFactory.openLogicFilter();
@@ -55,7 +64,7 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy{
             // 将传过来的 UserId, AwardId（似乎为空）, StrategyId 装进实体 RuleMatterEntity 中
             // ruleModel也是 "rule_blacklist" 黑名单
             ruleMatterEntity.setUserId(raffleFactorEntity.getUserId());
-            ruleMatterEntity.setAwardId(ruleMatterEntity.getAwardId());
+            ruleMatterEntity.setAwardId(raffleFactorEntity.getAwardId());
             ruleMatterEntity.setStrategyId(raffleFactorEntity.getStrategyId());
             ruleMatterEntity.setRuleModel(DefaultLogicFactory.LogicModel.RULE_BLACKLIST.getCode());
 
@@ -88,7 +97,7 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy{
             // 将传过来的 UserId, AwardId（似乎为空）, StrategyId 装进实体 RuleMatterEntity 中
             // ruleModel也是 "rule_blacklist" 黑名单
             ruleMatterEntity.setUserId(raffleFactorEntity.getUserId());
-            ruleMatterEntity.setAwardId(ruleMatterEntity.getAwardId());
+            ruleMatterEntity.setAwardId(raffleFactorEntity.getAwardId());
             ruleMatterEntity.setStrategyId(raffleFactorEntity.getStrategyId());
             ruleMatterEntity.setRuleModel(DefaultLogicFactory.LogicModel.RULE_WHITELIST.getCode());
 
@@ -122,7 +131,7 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy{
             RuleMatterEntity ruleMatterEntity = new RuleMatterEntity();
             // 将传过来的 UserId, AwardId（似乎为空）, StrategyId 装进实体 RuleMatterEntity 中
             ruleMatterEntity.setUserId(raffleFactorEntity.getUserId());
-            ruleMatterEntity.setAwardId(ruleMatterEntity.getAwardId());
+            ruleMatterEntity.setAwardId(raffleFactorEntity.getAwardId());
             ruleMatterEntity.setStrategyId(raffleFactorEntity.getStrategyId());
             ruleMatterEntity.setRuleModel(ruleModel);
 
@@ -138,5 +147,44 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy{
 
         return ruleActionEntity;
 
+    }
+
+    // 抽奖中置条件判断
+    @Override
+    protected RuleActionEntity<RuleActionEntity.RaffleCenterEntity> doCheckRaffleCenterLogic(RaffleFactorEntity raffleFactorEntity, String... logics) {
+        // 如果传过来的对应策略id和奖品id的rule_model为空，那么直接放行即可
+        if(logics == null || 0 == logics.length)
+            return RuleActionEntity.<RuleActionEntity.RaffleCenterEntity>builder()
+                    .code(RuleLogicCheckTypeVO.ALLOW.getCode())
+                    .info(RuleLogicCheckTypeVO.ALLOW.getInfo())
+                    .build();
+
+        // 1. 获取规则引擎工厂提供的部分
+        Map<String, ILogicFilter<RuleActionEntity.RaffleCenterEntity>> logicFilterGroup = logicFactory.openLogicFilter();
+
+        RuleActionEntity<RuleActionEntity.RaffleCenterEntity> ruleActionEntity = null;
+        // logics 传进去的就是string[]数组，将ruleModel按照 逗号 拆分开
+        for (String ruleModel : logics) {
+            // 抽奖中置规则判断，装配完之后放到filter中
+            ILogicFilter<RuleActionEntity.RaffleCenterEntity> logicFilter = logicFilterGroup.get(ruleModel);
+            RuleMatterEntity ruleMatterEntity = new RuleMatterEntity();
+            ruleMatterEntity.setUserId(raffleFactorEntity.getUserId());
+            ruleMatterEntity.setAwardId(raffleFactorEntity.getAwardId());
+            ruleMatterEntity.setStrategyId(raffleFactorEntity.getStrategyId());
+            ruleMatterEntity.setRuleModel(ruleModel);
+
+            // 抽奖中的filter就是去判断，根据strategyId，awardId（没咋用到）,ruleModel，去strategy_rule表中
+            // 找对应的rule_value字段，字段是指的抽奖 x 次可以解锁
+            ruleActionEntity = logicFilter.filter(ruleMatterEntity);
+            // 非放行结果则顺序过滤
+            log.info("抽奖中 规则过滤 userId: {} ruleModel: {} code: {} info: {}", raffleFactorEntity.getUserId(), ruleModel, ruleActionEntity.getCode(), ruleActionEntity.getInfo());
+
+            // 看看 RuleLogicCheckTypeVO 里面到底是 ALLOW 还是 TAKE_OVER
+            // 如果是不允许，那就直接返回了，已经没必要往下走了，这边已经不满足什么抽奖条件了
+            if (!RuleLogicCheckTypeVO.ALLOW.getCode().equals(ruleActionEntity.getCode()))
+                return ruleActionEntity;
+        }
+
+        return ruleActionEntity;
     }
 }
