@@ -1,13 +1,12 @@
-package cn.bigmarket.domain.strategy.service.rule.impl;
+package cn.bigmarket.domain.strategy.service.rule.filter.impl;
 
 import cn.bigmarket.domain.strategy.model.entity.RuleActionEntity;
 import cn.bigmarket.domain.strategy.model.entity.RuleMatterEntity;
 import cn.bigmarket.domain.strategy.model.vo.RuleLogicCheckTypeVO;
 import cn.bigmarket.domain.strategy.repository.IStrategyRepository;
 import cn.bigmarket.domain.strategy.service.annotation.LogicStrategy;
-import cn.bigmarket.domain.strategy.service.rule.ILogicFilter;
-import cn.bigmarket.domain.strategy.service.rule.factory.DefaultLogicFactory;
-import cn.bigmarket.types.common.Constants;
+import cn.bigmarket.domain.strategy.service.rule.filter.ILogicFilter;
+import cn.bigmarket.domain.strategy.service.rule.filter.factory.DefaultLogicFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +29,7 @@ public class RuleLockLogicFilter implements ILogicFilter<RuleActionEntity.Raffle
     public RuleActionEntity<RuleActionEntity.RaffleCenterEntity> filter(RuleMatterEntity ruleMatterEntity) {
 
         log.info("规则过滤-次数锁 userId:{} strategyId:{} ruleModel:{}", ruleMatterEntity.getUserId(), ruleMatterEntity.getStrategyId(), ruleMatterEntity.getRuleModel());
-        // 根据 strategyId，awardId，ruleModel 去查询表中 ruleValue（1 ， 2， 6）
+        // 根据 strategyId，awardId，ruleModel 去查询表中 ruleValue（1， 2， 6）
         String ruleValue = repository.queryStrategyRuleValue(ruleMatterEntity.getStrategyId(), ruleMatterEntity.getAwardId(), ruleMatterEntity.getRuleModel());
         // 将字符串转换成数字型
         long raffleCount = Long.parseLong(ruleValue);

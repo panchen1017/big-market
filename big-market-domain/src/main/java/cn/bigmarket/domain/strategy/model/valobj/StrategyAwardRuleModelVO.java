@@ -1,6 +1,6 @@
 package cn.bigmarket.domain.strategy.model.valobj;
 
-import cn.bigmarket.domain.strategy.service.rule.factory.DefaultLogicFactory;
+import cn.bigmarket.domain.strategy.service.rule.filter.factory.DefaultLogicFactory;
 import cn.bigmarket.types.common.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +24,8 @@ public class StrategyAwardRuleModelVO {
     public String[] raffleCenterRuleModelList() {
         // 把rule_models拆分 并且返回是 中置抽奖策略的 有哪些
         List<String> ruleModelList = new ArrayList<>();
+        if (null == ruleModels)
+            return null;
         String[] ruleModelValues = ruleModels.split(Constants.SPLIT);
         // 拆成 例如：rule_lock rule_luck_award
         for (String ruleModelValue : ruleModelValues) {

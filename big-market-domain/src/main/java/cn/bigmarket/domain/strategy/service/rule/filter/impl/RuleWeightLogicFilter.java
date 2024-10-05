@@ -1,12 +1,12 @@
-package cn.bigmarket.domain.strategy.service.rule.impl;
+package cn.bigmarket.domain.strategy.service.rule.filter.impl;
 
 import cn.bigmarket.domain.strategy.model.entity.RuleActionEntity;
 import cn.bigmarket.domain.strategy.model.entity.RuleMatterEntity;
 import cn.bigmarket.domain.strategy.model.vo.RuleLogicCheckTypeVO;
 import cn.bigmarket.domain.strategy.repository.IStrategyRepository;
 import cn.bigmarket.domain.strategy.service.annotation.LogicStrategy;
-import cn.bigmarket.domain.strategy.service.rule.ILogicFilter;
-import cn.bigmarket.domain.strategy.service.rule.factory.DefaultLogicFactory;
+import cn.bigmarket.domain.strategy.service.rule.filter.ILogicFilter;
+import cn.bigmarket.domain.strategy.service.rule.filter.factory.DefaultLogicFactory;
 import cn.bigmarket.types.common.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -64,12 +64,11 @@ public class RuleWeightLogicFilter implements ILogicFilter<RuleActionEntity.Raff
         // 我们的目的就是找到当前用户的例如：4500积分对应最小积分范围
         // 4000:102,103,104,105
         ArrayList<Long> analyticalValueGroupKeys = new ArrayList<>(analyticalValueGroup.keySet());
-
         Collections.sort(analyticalValueGroupKeys);
         Collections.reverse(analyticalValueGroupKeys);
 //        log.info("analyticalValueGroupKeys:{}",analyticalValueGroupKeys);
 
-        // 3. 找出最小符合的值，也就是【4500 积分，能找到 4000:102,103,104,105】、【5000 积分，能找到 5000:102,103,104,105,106,107】
+        // 3. 找出最小符合的值，也就是【4500 积分，能找到 4000:102,103,104,105】、【5050 积分，能找到 5000:102,103,104,105,106,107】
         Long nextValue = analyticalValueGroupKeys.stream()
                 .filter(keys -> userScore >= keys)
                 .findFirst()

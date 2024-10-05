@@ -1,25 +1,24 @@
-package cn.bigmarket.domain.strategy.service.rule.impl;
+package cn.bigmarket.domain.strategy.service.rule.filter.impl;
 
 import cn.bigmarket.domain.strategy.model.entity.RuleActionEntity;
 import cn.bigmarket.domain.strategy.model.entity.RuleMatterEntity;
 import cn.bigmarket.domain.strategy.model.vo.RuleLogicCheckTypeVO;
 import cn.bigmarket.domain.strategy.repository.IStrategyRepository;
 import cn.bigmarket.domain.strategy.service.annotation.LogicStrategy;
-import cn.bigmarket.domain.strategy.service.rule.ILogicFilter;
-import cn.bigmarket.domain.strategy.service.rule.factory.DefaultLogicFactory;
+import cn.bigmarket.domain.strategy.service.rule.filter.ILogicFilter;
+import cn.bigmarket.domain.strategy.service.rule.filter.factory.DefaultLogicFactory;
 import cn.bigmarket.types.common.Constants;
-import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 /**
- *  黑名单逻辑处理
+ *  白名单逻辑处理
  */
 @Slf4j
 @Component
-@LogicStrategy(logicMode = DefaultLogicFactory.LogicModel.RULE_BLACKLIST)
-public class RuleBackListLogicFilter implements ILogicFilter<RuleActionEntity.RaffleBeforeEntity> {
+@LogicStrategy(logicMode = DefaultLogicFactory.LogicModel.RULE_WHITELIST)
+public class RuleWhiteListLogicFilter implements ILogicFilter<RuleActionEntity.RaffleBeforeEntity> {
 
     @Resource
     private IStrategyRepository repository;
@@ -27,7 +26,7 @@ public class RuleBackListLogicFilter implements ILogicFilter<RuleActionEntity.Ra
     @Override
     public RuleActionEntity<RuleActionEntity.RaffleBeforeEntity> filter(RuleMatterEntity ruleMatterEntity) {
 
-        log.info("规则过滤-黑名单 userId:{} strategyId:{} ruleModel:{}", ruleMatterEntity.getUserId(), ruleMatterEntity.getStrategyId(), ruleMatterEntity.getRuleModel());
+        log.info("规则过滤-白名单 userId:{} strategyId:{} ruleModel:{}", ruleMatterEntity.getUserId(), ruleMatterEntity.getStrategyId(), ruleMatterEntity.getRuleModel());
         String userId = ruleMatterEntity.getUserId();
         Long strategyId = ruleMatterEntity.getStrategyId();
 
@@ -45,7 +44,7 @@ public class RuleBackListLogicFilter implements ILogicFilter<RuleActionEntity.Ra
         for (String userBlackId : userBlackIds) {
             if (userId.equals(userBlackId)) {
                 return RuleActionEntity.<RuleActionEntity.RaffleBeforeEntity>builder()
-                        .ruleModel(DefaultLogicFactory.LogicModel.RULE_BLACKLIST.getCode())
+                        .ruleModel(DefaultLogicFactory.LogicModel.RULE_WHITELIST.getCode())
                         .data(RuleActionEntity.RaffleBeforeEntity.builder()
                                 .strategyId(strategyId)
                                 .awardId(awardId)

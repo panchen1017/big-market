@@ -6,9 +6,11 @@ import cn.bigmarket.domain.strategy.model.entity.RuleActionEntity;
 import cn.bigmarket.domain.strategy.model.entity.RuleMatterEntity;
 import cn.bigmarket.domain.strategy.model.vo.RuleLogicCheckTypeVO;
 import cn.bigmarket.domain.strategy.repository.IStrategyRepository;
+import cn.bigmarket.domain.strategy.service.AbstractRaffleStrategy;
 import cn.bigmarket.domain.strategy.service.armory.IStrategyDispatch;
-import cn.bigmarket.domain.strategy.service.rule.ILogicFilter;
-import cn.bigmarket.domain.strategy.service.rule.factory.DefaultLogicFactory;
+import cn.bigmarket.domain.strategy.service.rule.chain.factory.DefaultChainFactory;
+import cn.bigmarket.domain.strategy.service.rule.filter.ILogicFilter;
+import cn.bigmarket.domain.strategy.service.rule.filter.factory.DefaultLogicFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -21,15 +23,14 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class DefaultRaffleStrategy extends AbstractRaffleStrategy{
+public class DefaultRaffleStrategy extends AbstractRaffleStrategy {
 
     @Resource
     private DefaultLogicFactory logicFactory;
 
-    public DefaultRaffleStrategy(IStrategyRepository repository, IStrategyDispatch strategyDispatch) {
-        super(repository, strategyDispatch);
+    public DefaultRaffleStrategy(IStrategyRepository repository, IStrategyDispatch strategyDispatch, DefaultChainFactory defaultChainFactory) {
+        super(repository, strategyDispatch, defaultChainFactory);
     }
-
 
 
     // 抽奖前置条件判断
@@ -45,7 +46,7 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy{
         // 1. 获取规则引擎工厂提供的部分
         Map<String, ILogicFilter<RuleActionEntity.RaffleBeforeEntity>> logicFilterGroup = logicFactory.openLogicFilter();
 
-        // 2. 黑名单规则优先过滤，logics传过来的是 " strategy 一行数据中的 rule_models"
+        // 2. 黑名单规则优先过滤，logics传过来的是 " strategy 中的 rule_models"
         // （（userId， strategyId）， rule_models）
         //  RULE_BLACKLIST("rule_blacklist","【抽奖前规则】黑名单规则过滤，命中黑名单则直接返回"),
         String ruleBackList = Arrays.stream(logics)

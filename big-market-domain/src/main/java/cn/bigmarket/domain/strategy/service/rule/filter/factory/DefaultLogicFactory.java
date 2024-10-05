@@ -1,8 +1,8 @@
-package cn.bigmarket.domain.strategy.service.rule.factory;
+package cn.bigmarket.domain.strategy.service.rule.filter.factory;
 
 import cn.bigmarket.domain.strategy.model.entity.RuleActionEntity;
 import cn.bigmarket.domain.strategy.service.annotation.LogicStrategy;
-import cn.bigmarket.domain.strategy.service.rule.ILogicFilter;
+import cn.bigmarket.domain.strategy.service.rule.filter.ILogicFilter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.core.annotation.AnnotationUtils;

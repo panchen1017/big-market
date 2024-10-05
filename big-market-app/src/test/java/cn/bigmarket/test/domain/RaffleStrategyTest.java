@@ -4,7 +4,7 @@ import cn.bigmarket.domain.strategy.model.entity.RaffleAwardEntity;
 import cn.bigmarket.domain.strategy.model.entity.RaffleFactorEntity;
 import cn.bigmarket.domain.strategy.service.IRaffleStrategy;
 import cn.bigmarket.domain.strategy.service.armory.IStrategyArmory;
-import cn.bigmarket.domain.strategy.service.rule.impl.RuleWeightLogicFilter;
+import cn.bigmarket.domain.strategy.service.rule.filter.impl.RuleWeightLogicFilter;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
