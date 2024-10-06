@@ -4,7 +4,7 @@ package cn.bigmarket.domain.strategy.service.raffle;
 import cn.bigmarket.domain.strategy.model.entity.RaffleFactorEntity;
 import cn.bigmarket.domain.strategy.model.entity.RuleActionEntity;
 import cn.bigmarket.domain.strategy.model.entity.RuleMatterEntity;
-import cn.bigmarket.domain.strategy.model.vo.RuleLogicCheckTypeVO;
+import cn.bigmarket.domain.strategy.model.valobj.RuleLogicCheckTypeVO;
 import cn.bigmarket.domain.strategy.repository.IStrategyRepository;
 import cn.bigmarket.domain.strategy.service.AbstractRaffleStrategy;
 import cn.bigmarket.domain.strategy.service.armory.IStrategyDispatch;

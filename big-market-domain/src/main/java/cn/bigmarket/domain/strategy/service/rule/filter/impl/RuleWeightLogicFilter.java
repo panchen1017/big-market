@@ -2,7 +2,7 @@ package cn.bigmarket.domain.strategy.service.rule.filter.impl;
 
 import cn.bigmarket.domain.strategy.model.entity.RuleActionEntity;
 import cn.bigmarket.domain.strategy.model.entity.RuleMatterEntity;
-import cn.bigmarket.domain.strategy.model.vo.RuleLogicCheckTypeVO;
+import cn.bigmarket.domain.strategy.model.valobj.RuleLogicCheckTypeVO;
 import cn.bigmarket.domain.strategy.repository.IStrategyRepository;
 import cn.bigmarket.domain.strategy.service.annotation.LogicStrategy;
 import cn.bigmarket.domain.strategy.service.rule.filter.ILogicFilter;

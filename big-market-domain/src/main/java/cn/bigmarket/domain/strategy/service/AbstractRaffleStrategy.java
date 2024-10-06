@@ -3,16 +3,12 @@ package cn.bigmarket.domain.strategy.service;
 import cn.bigmarket.domain.strategy.model.entity.RaffleAwardEntity;
 import cn.bigmarket.domain.strategy.model.entity.RaffleFactorEntity;
 import cn.bigmarket.domain.strategy.model.entity.RuleActionEntity;
-import cn.bigmarket.domain.strategy.model.entity.StrategyEntity;
 import cn.bigmarket.domain.strategy.model.valobj.StrategyAwardRuleModelVO;
-import cn.bigmarket.domain.strategy.model.vo.RuleLogicCheckTypeVO;
+import cn.bigmarket.domain.strategy.model.valobj.RuleLogicCheckTypeVO;
 import cn.bigmarket.domain.strategy.repository.IStrategyRepository;
-import cn.bigmarket.domain.strategy.service.IRaffleStrategy;
 import cn.bigmarket.domain.strategy.service.armory.IStrategyDispatch;
 import cn.bigmarket.domain.strategy.service.rule.chain.ILogicChain;
 import cn.bigmarket.domain.strategy.service.rule.chain.factory.DefaultChainFactory;
-import cn.bigmarket.domain.strategy.service.rule.chain.impl.DefaultLogicChain;
-import cn.bigmarket.domain.strategy.service.rule.filter.factory.DefaultLogicFactory;
 import cn.bigmarket.types.enums.ResponseCode;
 import cn.bigmarket.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +51,32 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
 
         // 3. 通过责任链获得，奖品ID
         Integer awardId = logicChain.logic(userId, strategyId);
+
+        // 4. 查询奖品规则「抽奖中（拿到奖品ID时，过滤规则）、抽奖后（扣减完奖品库存后过滤，抽奖中拦截和无库存则走兜底）」
+        StrategyAwardRuleModelVO strategyAwardRuleModelVO = repository.queryStrategyAwardRuleModel(strategyId, awardId);
+
+        // 5. 抽奖中 - 规则过滤
+        RaffleFactorEntity raffleCenterFactor = RaffleFactorEntity.builder()
+                .userId(userId)
+                .strategyId(strategyId)
+                .awardId(awardId)
+                .build();
+        RuleActionEntity<RuleActionEntity.RaffleCenterEntity> ruleActionCenterEntity = this.doCheckRaffleCenterLogic(raffleCenterFactor, strategyAwardRuleModelVO.raffleCenterRuleModelList());
+        // "ruleActionCenterEntity" 是"抽奖中"的结果
+        // 判断 “ 抽奖中 ” 是否被接管
+        if (RuleLogicCheckTypeVO.TAKE_OVER.getCode().equals(ruleActionCenterEntity.getCode())){
+            log.info("【临时日志】中奖中规则拦截，通过抽奖后规则 rule_luck_award 走兜底奖励。");
+            return RaffleAwardEntity.builder()
+                    .awardDesc("中奖中规则拦截，通过抽奖后规则 rule_luck_award 走兜底奖励。")
+                    .build();
+        }
+
+        // 走一个库存的处理，走库存的操作，如果库存不足，就要去走抽奖后的操作（兜底）
+        // 抽奖中->抽奖后，存在一个判断库存的操作，这个流程不是一个顺序性的规则
+
+        return RaffleAwardEntity.builder()
+                .awardId(awardId)
+                .build();
 
 
         // 使用责任链全部替换掉下方代码
@@ -106,35 +128,34 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy {
 
         // 过滤抽奖中的规则 去 strategy_award 拿 rule_models
         // 6. 查询奖品规则「抽奖中（拿到奖品ID时，过滤规则）、抽奖后（扣减完奖品库存后过滤，抽奖中拦截和无库存则走兜底）」
-        StrategyAwardRuleModelVO strategyAwardRuleModelVO = repository.queryStrategyAwardRuleModel(strategyId, awardId);
-
-//        if(logics == null || 0 == logics.length)
-        // 7. 抽奖中 - 规则过滤
-        // 现在 strategyAwardRuleModelVO 就是 那些 “rule_lock” 抽奖中的策略判断了
-        RaffleFactorEntity raffleCenterFactor = RaffleFactorEntity.builder()
-                .userId(userId)
-                .strategyId(strategyId)
-                .awardId(awardId)
-                .build();
-
-        // 传入主要是 （raffleFactor， strategy_award 一行数据中的 ruleModels）
-        // raffleFactor：userId,strategyId（“xiaofuge”， 100001L）
-        // strategyAwardRuleModelVO.raffleCenterRuleModelList() 传进去的就是string[]数组，将ruleModel按照 逗号 拆分开
-        RuleActionEntity<RuleActionEntity.RaffleCenterEntity> ruleActionCenterEntity = this.doCheckRaffleCenterLogic(raffleCenterFactor, strategyAwardRuleModelVO.raffleCenterRuleModelList());
-
-        // 8. 判断是否被规则接管
-        if (RuleLogicCheckTypeVO.TAKE_OVER.getCode().equals(ruleActionCenterEntity.getCode())){
-            log.info("【临时日志】中奖中规则拦截，通过抽奖后规则 rule_luck_award 走兜底奖励。");
-            return RaffleAwardEntity.builder()
-                    .awardDesc("中奖中规则拦截，通过抽奖后规则 rule_luck_award 走兜底奖励。")
-                    .build();
-        }
-
-        // 8. 库存相关的之后再进行实现
-
-        return RaffleAwardEntity.builder()
-                .awardId(awardId)
-                .build();
+//        StrategyAwardRuleModelVO strategyAwardRuleModelVO = repository.queryStrategyAwardRuleModel(strategyId, awardId);
+//
+////        if(logics == null || 0 == logics.length)
+//        // 7. 抽奖中 - 规则过滤(拿到抽奖中的结果)
+//        // 现在 strategyAwardRuleModelVO 就是 那些 “rule_lock” 抽奖中的策略判断了
+//        RaffleFactorEntity raffleCenterFactor = RaffleFactorEntity.builder()
+//                .userId(userId)
+//                .strategyId(strategyId)
+//                .awardId(awardId)
+//                .build();
+//        // 传入主要是 （raffleFactor， strategy_award 一行数据中的 ruleModels）
+//        // raffleFactor：userId,strategyId（“xiaofuge”， 100001L）
+//        // strategyAwardRuleModelVO.raffleCenterRuleModelList() 传进去的就是string[]数组，将ruleModel按照 逗号 拆分开
+//        RuleActionEntity<RuleActionEntity.RaffleCenterEntity> ruleActionCenterEntity = this.doCheckRaffleCenterLogic(raffleCenterFactor, strategyAwardRuleModelVO.raffleCenterRuleModelList());
+//
+//        // 8. 判断是否被规则接管
+//        if (RuleLogicCheckTypeVO.TAKE_OVER.getCode().equals(ruleActionCenterEntity.getCode())){
+//            log.info("【临时日志】中奖中规则拦截，通过抽奖后规则 rule_luck_award 走兜底奖励。");
+//            return RaffleAwardEntity.builder()
+//                    .awardDesc("中奖中规则拦截，通过抽奖后规则 rule_luck_award 走兜底奖励。")
+//                    .build();
+//        }
+//
+//        // 8. 库存相关的之后再进行实现
+//
+//        return RaffleAwardEntity.builder()
+//                .awardId(awardId)
+//                .build();
     }
     protected abstract RuleActionEntity<RuleActionEntity.RaffleBeforeEntity> doCheckRaffleBeforeLogic(RaffleFactorEntity raffleFactorEntity, String... logics);
 

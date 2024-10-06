@@ -1,4 +1,4 @@
-package cn.bigmarket.domain.strategy.model.vo;
+package cn.bigmarket.domain.strategy.model.valobj;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

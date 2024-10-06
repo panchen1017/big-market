@@ -1,6 +1,6 @@
 package cn.bigmarket.domain.strategy.model.entity;
 
-import cn.bigmarket.domain.strategy.model.vo.RuleLogicCheckTypeVO;
+import cn.bigmarket.domain.strategy.model.valobj.RuleLogicCheckTypeVO;
 import lombok.*;
 
 /**
