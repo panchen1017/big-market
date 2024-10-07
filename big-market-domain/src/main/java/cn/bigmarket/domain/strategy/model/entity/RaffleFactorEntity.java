@@ -13,8 +13,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RaffleFactorEntity {
+    /**
+     * 抽奖的时候只给 奖品id 和 用户id 即可
+     */
     private String userId;
     private Long strategyId;
 
-    private Integer awardId;
 }

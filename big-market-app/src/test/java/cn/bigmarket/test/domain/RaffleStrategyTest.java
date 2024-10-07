@@ -4,7 +4,7 @@ import cn.bigmarket.domain.strategy.model.entity.RaffleAwardEntity;
 import cn.bigmarket.domain.strategy.model.entity.RaffleFactorEntity;
 import cn.bigmarket.domain.strategy.service.IRaffleStrategy;
 import cn.bigmarket.domain.strategy.service.armory.IStrategyArmory;
-import cn.bigmarket.domain.strategy.service.rule.filter.impl.RuleWeightLogicFilter;
+import cn.bigmarket.domain.strategy.service.rule.chain.impl.RuleWeightLogicChain;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -27,34 +27,31 @@ import javax.annotation.Resource;
 public class RaffleStrategyTest {
 
     @Resource
+    private IStrategyArmory strategyArmory;
+    @Resource
     private IRaffleStrategy raffleStrategy;
     @Resource
-    private IStrategyArmory strategyArmory;
+    private RuleWeightLogicChain ruleWeightLogicChain;
 
-    @Resource
-    private RuleWeightLogicFilter ruleWeightLogicFilter;
-
-
-    @Before
-    public void test_strategyArmory() {
-        boolean res = strategyArmory.assembleLotteryStrategy(100001L);
-        log.info("测试结果：{}", res);
-    }
     @Before
     public void setUp() {
-        ReflectionTestUtils.setField(ruleWeightLogicFilter, "userScore", 4050L);
-    }
+        // 策略装配 100001、100002、100003
+        log.info("测试结果：{}", strategyArmory.assembleLotteryStrategy(100001L));
+        log.info("测试结果：{}", strategyArmory.assembleLotteryStrategy(100006L));
 
+        // 通过反射 mock 规则中的值
+        ReflectionTestUtils.setField(ruleWeightLogicChain, "userScore", 4900L);
+    }
 
     @Test
     public void test_performRaffle() {
         RaffleFactorEntity raffleFactorEntity = RaffleFactorEntity.builder()
                 .userId("xiaofuge")
-                .strategyId(100001L)
+                .strategyId(100006L)
                 .build();
 
         RaffleAwardEntity raffleAwardEntity = raffleStrategy.performRaffle(raffleFactorEntity);
-        // 只可能抽102 - 105
+
         log.info("请求参数：{}", JSON.toJSONString(raffleFactorEntity));
         log.info("测试结果：{}", JSON.toJSONString(raffleAwardEntity));
     }
@@ -67,19 +64,24 @@ public class RaffleStrategyTest {
                 .build();
 
         RaffleAwardEntity raffleAwardEntity = raffleStrategy.performRaffle(raffleFactorEntity);
-        // 只可能抽 101
+
         log.info("请求参数：{}", JSON.toJSONString(raffleFactorEntity));
         log.info("测试结果：{}", JSON.toJSONString(raffleAwardEntity));
     }
+
+    /**
+     * 次数错校验，抽奖n次后解锁。100003 策略，你可以通过调整 @Before 的 setUp 方法中个人抽奖次数来验证。比如最开始设置0，之后设置10
+     * ReflectionTestUtils.setField(ruleLockLogicFilter, "userRaffleCount", 10L);
+     */
     @Test
-    public void test_performRaffle_whitelist() {
+    public void test_raffle_center_rule_lock(){
         RaffleFactorEntity raffleFactorEntity = RaffleFactorEntity.builder()
-                .userId("user004")  // 白名单用户 user004, user005, user006
-                .strategyId(100001L)
+                .userId("xiaofuge")
+                .strategyId(100003L)
                 .build();
 
         RaffleAwardEntity raffleAwardEntity = raffleStrategy.performRaffle(raffleFactorEntity);
-        // 只可能抽 104
+
         log.info("请求参数：{}", JSON.toJSONString(raffleFactorEntity));
         log.info("测试结果：{}", JSON.toJSONString(raffleAwardEntity));
     }

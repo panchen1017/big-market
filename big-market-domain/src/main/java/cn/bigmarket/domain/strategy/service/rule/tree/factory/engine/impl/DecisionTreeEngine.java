@@ -29,11 +29,11 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
     }
 
     @Override
-    public DefaultTreeFactory.StrategyAwardData process(String userId, Long strategyId, Integer awardId) {
+    public DefaultTreeFactory.StrategyAwardVO process(String userId, Long strategyId, Integer awardId) {
 
         // process方法 就是去处理二叉树当中的走向
         // 首先，创建一个要返回的对象
-        DefaultTreeFactory.StrategyAwardData strategyAwardData = null;
+        DefaultTreeFactory.StrategyAwardVO strategyAwardData = null;
 
         // 获取当前树对象基本信息（根节点，子节点map）
         String nextNode = ruleTreeVO.getTreeRootRuleNode();
@@ -57,7 +57,7 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
             // ruleLogicCheckTypeVO：是否能走到下一个节点的信息
             // strategyAwardData：当前对象的数据信息
             RuleLogicCheckTypeVO ruleLogicCheckTypeVO = logicEntity.getRuleLogicCheckType();
-            strategyAwardData = logicEntity.getStrategyAwardData();// awardId / awardRuleValue
+            strategyAwardData = logicEntity.getStrategyAwardVO();// awardId / awardRuleValue
             log.info("决策树引擎【{}】treeId:{} node:{} code:{}", ruleTreeVO.getTreeName(), ruleTreeVO.getTreeId(), nextNode, ruleLogicCheckTypeVO.getCode());
 
             // 3. 获取下个节点
@@ -65,8 +65,6 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
             // ruleTreeNode.getTreeNodeLineVOList 是获取存放节点的连线
             nextNode = nextNode(ruleLogicCheckTypeVO.getCode(), ruleTreeNode.getTreeNodeLineVOList());
             ruleTreeNode = treeNodeMap.get(nextNode);
-
-
         }
         // 返回最终结果
         return strategyAwardData;

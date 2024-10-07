@@ -3,6 +3,7 @@ package cn.bigmarket.domain.strategy.service.rule.chain.impl;
 import cn.bigmarket.domain.strategy.repository.IStrategyRepository;
 import cn.bigmarket.domain.strategy.service.armory.IStrategyDispatch;
 import cn.bigmarket.domain.strategy.service.rule.chain.AbstractLogicChain;
+import cn.bigmarket.domain.strategy.service.rule.chain.factory.DefaultChainFactory;
 import cn.bigmarket.types.common.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -27,7 +28,7 @@ public class RuleWeightLogicChain extends AbstractLogicChain {
      * 2. 解析数据格式；判断哪个范围符合用户的特定抽奖范围
      */
     @Override
-    public Integer logic(String userId, Long strategyId) {
+    public DefaultChainFactory.StrategyAwardVO logic(String userId, Long strategyId) {
         log.info("抽奖责任链-权重开始 userId: {} strategyId: {} ruleModel: {}", userId, strategyId, ruleModels());
         String ruleValue = strategyRepository.queryStrategyRuleValue(strategyId, ruleModels());
         // 1. 根据用户ID查询用户抽奖消耗的积分值
@@ -53,7 +54,10 @@ public class RuleWeightLogicChain extends AbstractLogicChain {
             // 这里的 analyticalValueGroup.get(nextValue) 就是 102,103,104,105,106,107（可以抽到的奖品池）
             Integer awardId = strategyDispatch.getRandomAward(strategyId, analyticalValueGroup.get(nextValue));
             log.info("抽奖责任链-权重接管 userId: {} strategyId: {} ruleModel: {} awardId: {}", userId, strategyId, ruleModels(), awardId);
-            return awardId;
+            return DefaultChainFactory.StrategyAwardVO.builder()
+                    .awardId(awardId)
+                    .logicModel(ruleModels())
+                    .build();
         }
 
         // 如果 nextValue 为空，说明没有匹配值，直接放行
@@ -99,6 +103,6 @@ public class RuleWeightLogicChain extends AbstractLogicChain {
 
     @Override
     protected String ruleModels() {
-        return "rule_weight";
+        return DefaultChainFactory.LogicModel.RULE_WEIGHT.getCode();
     }
 }

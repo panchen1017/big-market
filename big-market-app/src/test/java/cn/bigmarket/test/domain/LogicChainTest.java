@@ -4,6 +4,7 @@ import cn.bigmarket.domain.strategy.service.armory.IStrategyArmory;
 import cn.bigmarket.domain.strategy.service.rule.chain.ILogicChain;
 import cn.bigmarket.domain.strategy.service.rule.chain.factory.DefaultChainFactory;
 import cn.bigmarket.domain.strategy.service.rule.chain.impl.RuleWeightLogicChain;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,8 +43,8 @@ public class LogicChainTest {
     @Test
     public void test_LogicChain_rule_blacklist() {
         ILogicChain logicChain = defaultChainFactory.openLogicChain(100001L);
-        Integer awardId = logicChain.logic("user001", 100001L);
-        log.info("测试结果：{}", awardId);
+        DefaultChainFactory.StrategyAwardVO user001 = logicChain.logic("user001", 100001L);
+        log.info("测试结果：{}", JSON.toJSONString(user001));
     }
 
     @Test
@@ -51,15 +52,15 @@ public class LogicChainTest {
         // 通过反射 mock 规则中的值
         ReflectionTestUtils.setField(ruleWeightLogicChain, "userScore", 4900L);
         ILogicChain logicChain = defaultChainFactory.openLogicChain(100001L);
-        Integer awardId = logicChain.logic("xiaofuge", 100001L);
-        log.info("测试结果：{}", awardId);
+        DefaultChainFactory.StrategyAwardVO xiaofuge = logicChain.logic("xiaofuge", 100001L);
+        log.info("测试结果：{}", JSON.toJSONString(xiaofuge));
     }
 
     @Test
     public void test_LogicChain_rule_default() {
         ILogicChain logicChain = defaultChainFactory.openLogicChain(100001L);
-        Integer awardId = logicChain.logic("xiaofuge", 100001L);
-        log.info("测试结果：{}", awardId);
+        DefaultChainFactory.StrategyAwardVO xiaofuge = logicChain.logic("xiaofuge", 100001L);
+        log.info("测试结果：{}", JSON.toJSONString(xiaofuge));
     }
 
 }

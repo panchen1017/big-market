@@ -2,6 +2,7 @@ package cn.bigmarket.domain.strategy.service.rule.tree.factory;
 
 import cn.bigmarket.domain.strategy.model.valobj.RuleLogicCheckTypeVO;
 import cn.bigmarket.domain.strategy.model.valobj.RuleTreeVO;
+import cn.bigmarket.domain.strategy.service.rule.chain.factory.DefaultChainFactory;
 import cn.bigmarket.domain.strategy.service.rule.tree.ILogicTreeNode;
 import cn.bigmarket.domain.strategy.service.rule.tree.factory.engine.IDecisionTreeEngine;
 import cn.bigmarket.domain.strategy.service.rule.tree.factory.engine.impl.DecisionTreeEngine;
@@ -45,14 +46,14 @@ public class DefaultTreeFactory {
         private RuleLogicCheckTypeVO ruleLogicCheckType;
 
         // awardId / awardRuleValue
-        private StrategyAwardData strategyAwardData;
+        private StrategyAwardVO strategyAwardVO;
     }
 
     @Data
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class StrategyAwardData {
+    public static class StrategyAwardVO {
         /** 抽奖奖品ID - 内部流转使用 */
         private Integer awardId;
         /** 抽奖奖品规则 */
