@@ -5,12 +5,11 @@ import cn.bigmarket.domain.strategy.model.entity.StrategyAwardEntity;
 import cn.bigmarket.domain.strategy.model.entity.StrategyEntity;
 import cn.bigmarket.domain.strategy.model.entity.StrategyRuleEntity;
 import cn.bigmarket.domain.strategy.repository.IStrategyRepository;
+import cn.bigmarket.types.common.Constants;
 import cn.bigmarket.types.enums.ResponseCode;
 import cn.bigmarket.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,16 +25,25 @@ public class StrategyArmoryDispatch implements  IStrategyArmory, IStrategyDispat
 
     @Resource
     private IStrategyRepository repository;
-
     @Override
     public boolean assembleLotteryStrategy(Long strategyId) {
 
         // 根据策略id去查他的值
         // 1. 查询策略配置
-        List<StrategyAwardEntity> strategyAwardEntities = repository.queryStrategyAwardList(strategyId);//
+        List<StrategyAwardEntity> strategyAwardEntities = repository.queryStrategyAwardList(strategyId);
+
+        // 2. 缓存奖品库存【用于decr扣减库存使用】
+        // 把对应 strategyId 中的 awardId 对应的奖品库存一个个装进redis中
+        for (StrategyAwardEntity strategyAwardEntity : strategyAwardEntities) {
+            Integer awardId = strategyAwardEntity.getAwardId();
+            Integer awardCount = strategyAwardEntity.getAwardCount();
+            cacheStrategyAwardCount(strategyId, awardId, awardCount);
+        }
+
+        // 3.1 默认装配配置【全量抽奖概率】
         assembleLotteryStrategy(String.valueOf(strategyId), strategyAwardEntities);
 
-        // 2. 权重策略配置 - 适用于 rule_weight 权重规则配置
+        // 3.2 权重策略配置 - 适用于 rule_weight 权重规则配置
         // 查询出我要的权重配置
         StrategyEntity strategyEntity = repository.queryStrategyEntityByStrategyId(strategyId);
         // 判断strategy表中的有没有rule_weight
@@ -71,6 +79,19 @@ public class StrategyArmoryDispatch implements  IStrategyArmory, IStrategyDispat
         }
         return true;
     }
+    /**
+     * 缓存奖品库存到Redis
+     *
+     * @param strategyId 策略ID
+     * @param awardId    奖品ID
+     * @param awardCount 奖品库存
+     */
+
+    private void cacheStrategyAwardCount(Long strategyId, Integer awardId, Integer awardCount) {
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_KEY + strategyId + Constants.UNDERLINE + awardId;
+        repository.cacheStrategyAwardCount(cacheKey, awardCount);
+    }
+
     private void assembleLotteryStrategy(String key,  List<StrategyAwardEntity> strategyAwardEntities) {
 
         // 1. 获取表中概率的最小值
@@ -144,6 +165,12 @@ public class StrategyArmoryDispatch implements  IStrategyArmory, IStrategyDispat
         // SecureRandom 是一种更强大的随机数生成器 ，专为安全场景设计。SecureRandom().nextInt(rateRange)就是给一个 0 ~ 6000 的随机数
         // 它使用加密算法作为随机数生成的基础，生成的随机数是不可预测的，即使你知道了部分的种子或之前的输出，也无法预测下一个随机数。
         return repository.getStrategyAwardAssemble(key, new SecureRandom().nextInt(rateRange));
+    }
+
+    @Override
+    public Boolean subtractionAwardStock(Long strategyId, Integer awardId) {
+        String cacheKey = Constants.RedisKey.STRATEGY_AWARD_COUNT_KEY + strategyId + Constants.UNDERLINE + awardId;
+        return repository.subtractionAwardStock(cacheKey);
     }
 
 

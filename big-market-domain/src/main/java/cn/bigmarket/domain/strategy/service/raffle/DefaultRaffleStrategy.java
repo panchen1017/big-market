@@ -3,6 +3,7 @@ package cn.bigmarket.domain.strategy.service.raffle;
 
 import cn.bigmarket.domain.strategy.model.valobj.RuleTreeVO;
 import cn.bigmarket.domain.strategy.model.valobj.StrategyAwardRuleModelVO;
+import cn.bigmarket.domain.strategy.model.valobj.StrategyAwardStockKeyVO;
 import cn.bigmarket.domain.strategy.repository.IStrategyRepository;
 import cn.bigmarket.domain.strategy.service.AbstractRaffleStrategy;
 import cn.bigmarket.domain.strategy.service.armory.IStrategyDispatch;
@@ -52,11 +53,19 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy {
             // 但是 rule_tree 表中并没有对应的树，要抛个异常
             throw new RuntimeException("存在抽奖策略配置的规则模型 Key，未在库表 rule_tree、rule_tree_node、rule_tree_line 配置对应的规则树信息 " + strategyAwardRuleModelVO.getRuleModels());
         }
-        // 调用决策树工厂接口，实现起其中的 process 方法（上节课做的）
+        // 调用决策树工厂接口，实现其中的 process 方法（上节课做的）
         IDecisionTreeEngine treeEngine = defaultTreeFactory.openLogicTree(ruleTreeVO);
         DefaultTreeFactory.StrategyAwardVO treeProcessResult = treeEngine.process(userId, strategyId, awardId);
         return treeProcessResult;
     }
 
+    @Override
+    public StrategyAwardStockKeyVO takeQueueValue() throws InterruptedException {
+        return repository.takeQueueValue();
+    }
 
+    @Override
+    public void updateStrategyAwardStock(Long strategyId, Integer awardId) {
+        repository.updateStrategyAwardStock(strategyId, awardId);
+    }
 }

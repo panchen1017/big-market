@@ -52,7 +52,7 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
 
             // 2. 决策节点计算
             // 根据 logicTreeNode（"rule_stock"，"rule_luck_award"，"rule_lock"）去过对应的逻辑 logic
-            DefaultTreeFactory.TreeActionEntity logicEntity = logicTreeNode.logic(userId, strategyId, awardId);
+            DefaultTreeFactory.TreeActionEntity logicEntity = logicTreeNode.logic(userId, strategyId, awardId, ruleTreeNode.getRuleValue());
             // 获取 logicEntity 的结果（"TAKE_OVER" / "ALLOW"）
             // ruleLogicCheckTypeVO：是否能走到下一个节点的信息
             // strategyAwardData：当前对象的数据信息
@@ -68,12 +68,12 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
         }
         // 返回最终结果
         return strategyAwardData;
-
     }
     private String nextNode(String matterValue, List<RuleTreeNodeLineVO> ruleTreeNodeLineVOList) {
         // treeNodeLineVOList 就是指当前节点两条（左，右子树）节点连线的信息
         // 如果为空，就说明当前就是叶子节点
-        if(null == ruleTreeNodeLineVOList || ruleTreeNodeLineVOList.size() == 0)
+//        if(null == ruleTreeNodeLineVOList || ruleTreeNodeLineVOList.size() == 0)
+        if(null == ruleTreeNodeLineVOList || ruleTreeNodeLineVOList.isEmpty())
             return null;
         for (RuleTreeNodeLineVO nodeLine : ruleTreeNodeLineVOList) {
             if(decisionLogic(matterValue, nodeLine)) {
@@ -81,7 +81,8 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
                 return nodeLine.getRuleNodeTo();
             }
         }
-        throw new RuntimeException("决策树引擎，nextNode 计算失败，未找到可执行节点！");
+        return null;
+//        throw new RuntimeException("决策树引擎，nextNode 计算失败，未找到可执行节点！");
     }
 
 

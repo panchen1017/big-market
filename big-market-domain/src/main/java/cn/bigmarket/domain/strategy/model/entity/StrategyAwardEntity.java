@@ -21,7 +21,6 @@ public class StrategyAwardEntity {
     private Long strategyId;
     /* 抽奖奖品ID */
     private Integer awardId;
-
     /* 奖品库存总量 */
     private Integer awardCount;
     /* 奖品库存剩余 */
