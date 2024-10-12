@@ -25,6 +25,9 @@ public class StrategyArmoryDispatch implements  IStrategyArmory, IStrategyDispat
 
     @Resource
     private IStrategyRepository repository;
+    private final SecureRandom secureRandom = new SecureRandom();
+
+
     @Override
     public boolean assembleLotteryStrategy(Long strategyId) {
 
@@ -99,32 +102,45 @@ public class StrategyArmoryDispatch implements  IStrategyArmory, IStrategyDispat
                 .map(StrategyAwardEntity::getAwardRate)
                 .min(BigDecimal::compareTo)
                 .orElse(BigDecimal.ZERO);
+        // 2. 循环计算找到概率范围值
+        BigDecimal rateRange = BigDecimal.valueOf(convert(minAwardRate.doubleValue()));
 
-        // 2. 获取表中概率的总和
-        BigDecimal totalAwardRate = strategyAwardEntities.stream()
-                .map(StrategyAwardEntity::getAwardRate)
-                .reduce(BigDecimal.ZERO, BigDecimal::add); // 选择 BigDecimal 是为了确保计算过程中不发生精度丢失或舍入误差。
-
-        // 3. 用 1 / 0.0001 获得概率范围， 百分位， 千分位， 万分位。
-        BigDecimal rateRange = totalAwardRate.divide(minAwardRate, 0, RoundingMode.CEILING);
-        // divide就是total精确地除以min，0 这个参数指定结果应该保留的小数位数。0 代表不保留小数位，即结果必须是整数。
-        // RoundingMode.CEILING是指向上取整，就是往比自己数字大的取整。
-
-        // 4.装配这些奖品序号，放入列表中。现在得到了一个范围值，就是抽奖在这个范围当中  strategyAwardSearchRateTables 存奖品id
-        // 比如 6000 个奖品 ，2000个小米台灯对应序号 （1），那就是 存 2000 个（1），xxx 个（2），xxx 个（3）
-        ArrayList<Integer> strategyAwardSearchRateTables = new ArrayList<>(rateRange.intValue());
+        // 3. 生成策略奖品概率查找表「这里指需要在list集合中，存放上对应的奖品占位即可，占位越多等于概率越高」
+        List<Integer> strategyAwardSearchRateTables = new ArrayList<>(rateRange.intValue());
         for (StrategyAwardEntity strategyAward : strategyAwardEntities) {
-            // 获取奖品id和奖品概率
             Integer awardId = strategyAward.getAwardId();
             BigDecimal awardRate = strategyAward.getAwardRate();
-
-            // 计算出每个概率值需要存放到的查找表的数量，循环填充
-            // rateRange就是一个总量，乘以awardRate，就能算出这个奖品对应的数据量是多少，让 i 去循环
-            // 比如101号奖品的概率为0.9，概率范围为100，那么101号在集合中应该占90个位置
-            for (int i = 0; i < rateRange.multiply(awardRate).setScale(BigDecimal.ROUND_CEILING).intValue(); i++) {
+            // 计算出每个概率值需要存放到查找表的数量，循环填充
+            for (int i = 0; i < rateRange.multiply(awardRate).intValue(); i++) {
                 strategyAwardSearchRateTables.add(awardId);
             }
         }
+
+//        // 2. 获取表中概率的总和
+//        BigDecimal totalAwardRate = strategyAwardEntities.stream()
+//                .map(StrategyAwardEntity::getAwardRate)
+//                .reduce(BigDecimal.ZERO, BigDecimal::add); // 选择 BigDecimal 是为了确保计算过程中不发生精度丢失或舍入误差。
+//
+//        // 3. 用 1 / 0.0001 获得概率范围， 百分位， 千分位， 万分位。
+//        BigDecimal rateRange = totalAwardRate.divide(minAwardRate, 0, RoundingMode.CEILING);
+//        // divide就是total精确地除以min，0 这个参数指定结果应该保留的小数位数。0 代表不保留小数位，即结果必须是整数。
+//        // RoundingMode.CEILING是指向上取整，就是往比自己数字大的取整。
+//
+//        // 4.装配这些奖品序号，放入列表中。现在得到了一个范围值，就是抽奖在这个范围当中  strategyAwardSearchRateTables 存奖品id
+//        // 比如 6000 个奖品 ，2000个小米台灯对应序号 （1），那就是 存 2000 个（1），xxx 个（2），xxx 个（3）
+//        ArrayList<Integer> strategyAwardSearchRateTables = new ArrayList<>(rateRange.intValue());
+//        for (StrategyAwardEntity strategyAward : strategyAwardEntities) {
+//            // 获取奖品id和奖品概率
+//            Integer awardId = strategyAward.getAwardId();
+//            BigDecimal awardRate = strategyAward.getAwardRate();
+//
+//            // 计算出每个概率值需要存放到的查找表的数量，循环填充
+//            // rateRange就是一个总量，乘以awardRate，就能算出这个奖品对应的数据量是多少，让 i 去循环
+//            // 比如101号奖品的概率为0.9，概率范围为100，那么101号在集合中应该占90个位置
+//            for (int i = 0; i < rateRange.multiply(awardRate).setScale(BigDecimal.ROUND_CEILING).intValue(); i++) {
+//                strategyAwardSearchRateTables.add(awardId);
+//            }
+//        }
         // 5. 乱序 将存好的 11111111......11111112222222......222222......333333....444444......555555 打乱
         Collections.shuffle(strategyAwardSearchRateTables);
 
@@ -142,6 +158,20 @@ public class StrategyArmoryDispatch implements  IStrategyArmory, IStrategyDispat
         repository.storeStrategySearchRateTables(key, shufflestrategyAwardSearchRateTables.size(), shufflestrategyAwardSearchRateTables);
 
     }
+
+    /**
+     * 转换计算，只根据小数位来计算。如【0.01返回100】、【0.009返回1000】、【0.0018返回10000】
+     */
+    private double convert(double min) {
+        double current = min;
+        double max = 1;
+        while (current < 1) {
+            current = current * 10;
+            max = max * 10;
+        }
+        return max;
+    }
+
     @Override
     public Integer getRandomAward(Long strategyId) {
 
@@ -150,8 +180,10 @@ public class StrategyArmoryDispatch implements  IStrategyArmory, IStrategyDispat
         // 这边去一个随机数，范围就是 0 ~ rateRange
         // SecureRandom 是一种更强大的随机数生成器 ，专为安全场景设计。SecureRandom().nextInt(rateRange)就是给一个 0 ~ 6000 的随机数
         // 它使用加密算法作为随机数生成的基础，生成的随机数是不可预测的，即使你知道了部分的种子或之前的输出，也无法预测下一个随机数。
-        return repository.getStrategyAwardAssemble(String.valueOf(strategyId), new SecureRandom().nextInt(rateRange));
+        return repository.getStrategyAwardAssemble(String.valueOf(strategyId), secureRandom.nextInt(rateRange));
     }
+
+
 
     @Override
     public Integer getRandomAward(Long strategyId, String ruleWeightValue) {

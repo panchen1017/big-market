@@ -2,6 +2,8 @@ package cn.bigmarket.domain.strategy.service;
 
 import cn.bigmarket.domain.strategy.model.entity.RaffleAwardEntity;
 import cn.bigmarket.domain.strategy.model.entity.RaffleFactorEntity;
+import cn.bigmarket.domain.strategy.model.entity.StrategyAwardEntity;
+import cn.bigmarket.domain.strategy.model.entity.StrategyEntity;
 import cn.bigmarket.domain.strategy.repository.IStrategyRepository;
 import cn.bigmarket.domain.strategy.service.armory.IStrategyDispatch;
 import cn.bigmarket.domain.strategy.service.rule.chain.factory.DefaultChainFactory;
@@ -15,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
  *  抽象策略实现类
  */
 @Slf4j
-public abstract class AbstractRaffleStrategy implements IRaffleStrategy, IRaffleStock{
+public abstract class AbstractRaffleStrategy implements IRaffleStrategy{
 
     // 策略仓储服务 -> domain层像一个大厨，仓储层提供米面粮油
     protected IStrategyRepository repository;
@@ -54,9 +56,7 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy, IRaffle
             //  RULE_DEFAULT   ->    "默认抽奖"      默认抽奖就是，直接去调用 getRandomAward(strategyId)去奖池中去抽一个奖品
             //  RULE_BLACKLIST ->    "黑名单抽奖"    黑名单的“101：user01，user02”已经有 awardId（101） 了
             //  RULE_WEIGHT    ->    "权重规则"      权重抽奖就是  getRandomAward(strategyId, ruleWeightValue)给定一个抽奖的范围。
-            return RaffleAwardEntity.builder()
-                    .awardId(chainStrategyAwardVO.getAwardId())
-                    .build();
+            return buildRaffleAwardEntity(strategyId, chainStrategyAwardVO.getAwardId(),null);
         }
         /**
          * 责任链是对用户进行排除的，同时用来筛选出strategy_rule的，真正决定抽出什么奖品的是规则树。
@@ -70,11 +70,17 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy, IRaffle
         log.info("抽奖策略计算-规则树 {} {} {} {}", userId, strategyId, treeStrategyAwardVO.getAwardId(), treeStrategyAwardVO.getAwardRuleValue());
 
         // 4. 返回抽奖结果
+        return buildRaffleAwardEntity(strategyId, treeStrategyAwardVO.getAwardId(),treeStrategyAwardVO.getAwardRuleValue());
+    }
+    private  RaffleAwardEntity buildRaffleAwardEntity(Long strategyId, Integer awardId, String awardConfig) {
+        StrategyAwardEntity strategyAwardEntity = repository.queryStrategyAwardEntity(strategyId, awardId);
         return RaffleAwardEntity.builder()
-                .awardId(treeStrategyAwardVO.getAwardId())
-                .awardConfig(treeStrategyAwardVO.getAwardRuleValue())
+                .awardId(awardId)
+                .awardConfig(awardConfig)
+                .sort(strategyAwardEntity.getSort())
                 .build();
     }
+
     /**
      * 抽奖计算，责任链抽象方法
      *
