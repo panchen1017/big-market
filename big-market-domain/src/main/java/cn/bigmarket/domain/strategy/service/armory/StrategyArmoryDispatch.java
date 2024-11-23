@@ -35,7 +35,7 @@ public class StrategyArmoryDispatch implements  IStrategyArmory, IStrategyDispat
         // 1. 查询策略配置
         List<StrategyAwardEntity> strategyAwardEntities = repository.queryStrategyAwardList(strategyId);
 
-        // 2. 缓存奖品库存【用于decr扣减库存使用】
+        // 2. 缓存奖品库存【用于decr扣减库存使用】 不超卖逻辑实现
         // 把对应 strategyId 中的 awardId 对应的奖品库存一个个装进redis中
         for (StrategyAwardEntity strategyAwardEntity : strategyAwardEntities) {
             Integer awardId = strategyAwardEntity.getAwardId();
@@ -54,22 +54,25 @@ public class StrategyArmoryDispatch implements  IStrategyArmory, IStrategyDispat
         if(null == ruleWeight) // 如果strategy表中的 rule_weight 为空，这说明它没有规则约束
             return true;
 
-        // 接下去根据strategyId，和 权重 来查询具体的 strategy_rule 的 id
+        // 接下去根据 strategyId，和 权重 来查询具体的 strategy_rule 的 id
         StrategyRuleEntity strategyRuleEntity = repository.queryStrategyRule(strategyId, ruleWeight);
         if(null == strategyRuleEntity) {
             // 抛出一个异常
             throw new AppException(ResponseCode.STRATEGY_RULE_WEIGHT_IS_NULL.getCode(), ResponseCode.STRATEGY_RULE_WEIGHT_IS_NULL.getInfo());
         }
 
-        // 拿到  4000:102,103,104,105
-        //      5000:102,103,104,105,106,107
-        //      6000:102,103,104,105,106,107,108,109
+//         返回的是： <4000, [102, 103, 104, 105]>
+//                  <5000, [102, 103, 104, 105, 106, 107]>
+//                  <6000, [102, 103, 104, 105, 106, 107]>
         Map<String, List<Integer>> ruleWeightValuesMap = strategyRuleEntity.getRuleWeightValues();
 
-        // 拿到map中的 KEY序列
+        // 拿到 map 中的 KEY序列
         Set<String> keys = ruleWeightValuesMap.keySet();
         for (String key : keys) {
             // 拿到每个 key 对应的 可以抽到的奖品编号
+//            [102, 103, 104, 105]
+//            [102, 103, 104, 105, 106]
+//            [102, 103, 104, 105, 106, 107]
             List<Integer> ruleWeightValues = ruleWeightValuesMap.get(key);
 
             // 再用深拷贝 去拷贝一份
@@ -96,51 +99,33 @@ public class StrategyArmoryDispatch implements  IStrategyArmory, IStrategyDispat
     }
 
     private void assembleLotteryStrategy(String key,  List<StrategyAwardEntity> strategyAwardEntities) {
-
         // 1. 获取表中概率的最小值
         BigDecimal minAwardRate = strategyAwardEntities.stream()
                 .map(StrategyAwardEntity::getAwardRate)
                 .min(BigDecimal::compareTo)
                 .orElse(BigDecimal.ZERO);
-        // 2. 循环计算找到概率范围值
+
+        // 2. 循环计算找到概率范围值 用 1 / 0.0001 获得概率范围， 百分位， 千分位， 万分位。
+        // divide就是total精确地除以min，0 这个参数指定结果应该保留的小数位数。0 代表不保留小数位，即结果必须是整数。
+        // RoundingMode.CEILING是指向上取整，就是往比自己数字大的取整。
         BigDecimal rateRange = BigDecimal.valueOf(convert(minAwardRate.doubleValue()));
 
         // 3. 生成策略奖品概率查找表「这里指需要在list集合中，存放上对应的奖品占位即可，占位越多等于概率越高」
+        // 装配这些奖品序号，放入列表中。现在得到了一个范围值，就是抽奖在这个范围当中  strategyAwardSearchRateTables 存奖品id
+        // 比如 6000 个奖品 ，2000个小米台灯对应序号 （1），那就是 存 2000 个（1），xxx 个（2），xxx 个（3）
         List<Integer> strategyAwardSearchRateTables = new ArrayList<>(rateRange.intValue());
         for (StrategyAwardEntity strategyAward : strategyAwardEntities) {
+            // 获取奖品id和奖品概率
             Integer awardId = strategyAward.getAwardId();
             BigDecimal awardRate = strategyAward.getAwardRate();
-            // 计算出每个概率值需要存放到查找表的数量，循环填充
+            // 计算出每个概率值需要存放到的查找表的数量，循环填充
+            // rateRange就是一个总量，乘以awardRate，就能算出这个奖品对应的数据量是多少，让 i 去循环
+            // 比如101号奖品的概率为0.9，概率范围为100，那么101号在集合中应该占90个位置
             for (int i = 0; i < rateRange.multiply(awardRate).intValue(); i++) {
                 strategyAwardSearchRateTables.add(awardId);
             }
         }
 
-//        // 2. 获取表中概率的总和
-//        BigDecimal totalAwardRate = strategyAwardEntities.stream()
-//                .map(StrategyAwardEntity::getAwardRate)
-//                .reduce(BigDecimal.ZERO, BigDecimal::add); // 选择 BigDecimal 是为了确保计算过程中不发生精度丢失或舍入误差。
-//
-//        // 3. 用 1 / 0.0001 获得概率范围， 百分位， 千分位， 万分位。
-//        BigDecimal rateRange = totalAwardRate.divide(minAwardRate, 0, RoundingMode.CEILING);
-//        // divide就是total精确地除以min，0 这个参数指定结果应该保留的小数位数。0 代表不保留小数位，即结果必须是整数。
-//        // RoundingMode.CEILING是指向上取整，就是往比自己数字大的取整。
-//
-//        // 4.装配这些奖品序号，放入列表中。现在得到了一个范围值，就是抽奖在这个范围当中  strategyAwardSearchRateTables 存奖品id
-//        // 比如 6000 个奖品 ，2000个小米台灯对应序号 （1），那就是 存 2000 个（1），xxx 个（2），xxx 个（3）
-//        ArrayList<Integer> strategyAwardSearchRateTables = new ArrayList<>(rateRange.intValue());
-//        for (StrategyAwardEntity strategyAward : strategyAwardEntities) {
-//            // 获取奖品id和奖品概率
-//            Integer awardId = strategyAward.getAwardId();
-//            BigDecimal awardRate = strategyAward.getAwardRate();
-//
-//            // 计算出每个概率值需要存放到的查找表的数量，循环填充
-//            // rateRange就是一个总量，乘以awardRate，就能算出这个奖品对应的数据量是多少，让 i 去循环
-//            // 比如101号奖品的概率为0.9，概率范围为100，那么101号在集合中应该占90个位置
-//            for (int i = 0; i < rateRange.multiply(awardRate).setScale(BigDecimal.ROUND_CEILING).intValue(); i++) {
-//                strategyAwardSearchRateTables.add(awardId);
-//            }
-//        }
         // 5. 乱序 将存好的 11111111......11111112222222......222222......333333....444444......555555 打乱
         Collections.shuffle(strategyAwardSearchRateTables);
 
@@ -182,8 +167,6 @@ public class StrategyArmoryDispatch implements  IStrategyArmory, IStrategyDispat
         // 它使用加密算法作为随机数生成的基础，生成的随机数是不可预测的，即使你知道了部分的种子或之前的输出，也无法预测下一个随机数。
         return repository.getStrategyAwardAssemble(String.valueOf(strategyId), secureRandom.nextInt(rateRange));
     }
-
-
 
     @Override
     public Integer getRandomAward(Long strategyId, String ruleWeightValue) {

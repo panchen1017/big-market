@@ -91,7 +91,7 @@ public class StrategyRepository implements IStrategyRepository {
     @Override
     public void storeStrategySearchRateTables(String key, Integer rateRange, HashMap<Integer, Integer> shufflestrategyAwardSearchRateTables) {
         // 1. 存储抽奖策略范围值，如6000，用于生成6000以内的随机数
-        // 这里只是去存一个key-value键值对，strategy-6000
+//        big_market_strategy_rate_range_key_100006， 23
         redisService.setValue(Constants.RedisKey.STRATEGY_RATE_RANGE_KEY + key, rateRange.intValue());
         // 2. 存储打乱后的 概率查找表
         RMap<Integer, Integer> map = redisService.getMap(Constants.RedisKey.STRATEGY_RATE_TABLE_KEY + key);
@@ -205,6 +205,7 @@ public class StrategyRepository implements IStrategyRepository {
         RuleTree ruleTree = ruleTreeDao.queryRuleTreeByTreeId(treeId);
         List<RuleTreeNode> ruleTreeNodes = ruleTreeNodeDao.queryRuleTreeNodeListByTreeId(treeId);
         List<RuleTreeNodeLine> ruleTreeNodeLines = ruleTreeNodeLineDao.queryRuleTreeNodeLineListByTreeId(treeId);
+
         // 1. tree node line 转换Map结构
         Map<String, List<RuleTreeNodeLineVO>> ruleTreeNodeLineMap = new HashMap<>();
         for (RuleTreeNodeLine ruleTreeNodeLine : ruleTreeNodeLines) {
@@ -258,7 +259,7 @@ public class StrategyRepository implements IStrategyRepository {
     }
 
     @Override
-    public Boolean subtractionAwardStock(String cacheKey) {
+    public Boolean  subtractionAwardStock(String cacheKey) {
         // surplus 指的是当前剩余库存数量减一之后的数量
         long surplus = redisService.decr(cacheKey);
         if(surplus < 0) {
@@ -269,8 +270,7 @@ public class StrategyRepository implements IStrategyRepository {
         String lockKey = cacheKey + Constants.UNDERLINE + surplus;
         // 1. 按照cacheKey decr 后的值，如 99、98、97 和 key 组成为库存锁的key进行使用。
         // 2. 加锁为了兜底，如果后续有恢复库存，手动处理等，也不会超卖。因为所有的可用库存key，都被加锁了。
-        // setNx加锁操作
-        // setNX 是 "Set if Not Exists"（如果不存在则设置）的缩写。
+        // setNX加锁操作 是 "Set if Not Exists"（如果不存在则设置）的缩写。
         // 其中 key 是要设置的键名，value 是要设置的值。
         // 如果键 key 不存在，则将键 key 的值设置为 value，并返回 1 表示设置成功。如果键 key 已经存在，则不进行任何操作，返回 0 表示设置失败
 

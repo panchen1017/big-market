@@ -85,7 +85,19 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
 //        throw new RuntimeException("决策树引擎，nextNode 计算失败，未找到可执行节点！");
     }
 
-
+    public boolean decisionLogic(String matterValue, RuleTreeNodeLineVO nodeLine) {
+        switch (nodeLine.getRuleLimitType()) {
+            case EQUAL:
+                return matterValue.equals(nodeLine.getRuleLimitValue().getCode());
+            // 以下规则暂时不需要实现
+            case GT:
+            case LT:
+            case GE:
+            case LE:
+            default:
+                return false;
+        }
+    }
 //        // 要返回的对象
 //        DefaultTreeFactory.StrategyAwardData strategyAwardData = null;
 //
@@ -137,19 +149,7 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
 //        throw new RuntimeException("决策树引擎，nextNode 计算失败，未找到可执行节点！");
 //    }
 
-    public boolean decisionLogic(String matterValue, RuleTreeNodeLineVO nodeLine) {
-        switch (nodeLine.getRuleLimitType()) {
-            case EQUAL:
-                return matterValue.equals(nodeLine.getRuleLimitValue().getCode());
-            // 以下规则暂时不需要实现
-            case GT:
-            case LT:
-            case GE:
-            case LE:
-            default:
-                return false;
-        }
-    }
+
 
 
 

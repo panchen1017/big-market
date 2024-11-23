@@ -26,7 +26,6 @@ public class RuleTreeNodeVO {
     private String ruleDesc;
     /** 规则比值 */
     private String ruleValue;
-
     /** 规则连线 */
     private List<RuleTreeNodeLineVO> treeNodeLineVOList;
 

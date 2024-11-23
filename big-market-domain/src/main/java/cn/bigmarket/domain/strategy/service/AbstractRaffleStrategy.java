@@ -53,13 +53,13 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy{
         // 判断是否是 “ 黑名单 ” 或者 “ 权重抽奖 ”，如果是，直接返回，否则继续走下面 “默认抽奖” 的逻辑
         if (!DefaultChainFactory.LogicModel.RULE_DEFAULT.getCode().equals(chainStrategyAwardVO.getLogicModel())) {
             //  如果是 “ 黑名单 ” 或者 “ 权重抽奖 ”，直接返回 awardId
-            //  RULE_DEFAULT   ->    "默认抽奖"      默认抽奖就是，直接去调用 getRandomAward(strategyId)去奖池中去抽一个奖品
+            //  RULE_DEFAULT   ->    "默认抽奖"      默认抽奖就是，直接去调用 getRandomAward(strategyId)去奖池中去抽一个奖品（对应积分不到 4000 ）
             //  RULE_BLACKLIST ->    "黑名单抽奖"    黑名单的“101：user01，user02”已经有 awardId（101） 了
             //  RULE_WEIGHT    ->    "权重规则"      权重抽奖就是  getRandomAward(strategyId, ruleWeightValue)给定一个抽奖的范围。
             return buildRaffleAwardEntity(strategyId, chainStrategyAwardVO.getAwardId(),null);
         }
         /**
-         * 责任链是对用户进行排除的，同时用来筛选出strategy_rule的，真正决定抽出什么奖品的是规则树。
+         * 责任链是对用户进行排除的，同时用来筛选出 strategy_rule 的，真正决定抽出什么奖品的是规则树。
          * 所以我们需要对规则树的每一个不同的筛选类型的节点更改代码。
          * 上方责任链已经过滤掉 “黑名单” 和 “权重规则” 了，下方是 “默认抽奖” 抽到的目前的这个 awardId 去看这个奖品的库存情况
          */
@@ -99,9 +99,6 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy{
      * @return 过滤结果【奖品ID，会根据抽奖次数判断、库存判断、兜底兜里返回最终的可获得奖品信息】
      */
     public abstract DefaultTreeFactory.StrategyAwardVO raffleLogicTree(String userId, Long strategyId, Integer awardId);
-
-
-
 
 
 }

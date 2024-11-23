@@ -27,7 +27,6 @@ public class RuleLuckAwardLogicTreeNode implements ILogicTreeNode {
         }
         Integer luckAwardId = Integer.parseInt(split[0]);
         String awardRuleValue = split.length > 1 ? split[1] : "";
-
         // 返回兜底奖品
         log.info("规则过滤-兜底奖品 userId:{} strategyId:{} awardId:{} awardRuleValue:{}", userId, strategyId, luckAwardId, awardRuleValue);
 

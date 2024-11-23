@@ -40,3 +40,5 @@ build/
 /data/
 /.idea/
 /docs/dev-ops/mysql/sql/big_market.sql
+/docs/dev-ops/mysql/sql/big_market_01.sql
+/docs/dev-ops/mysql/sql/big_market_02.sql

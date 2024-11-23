@@ -50,11 +50,11 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy implements IRa
             return DefaultTreeFactory.StrategyAwardVO.builder()
                     .awardId(awardId)
                     .build();
-        // 用刚刚找到的 ruleModels 例如：“rule_lock”,“rule_luck_award”....
+        // 用刚刚找到的 ruleModels 例如：“tree_lock”,“tree_luck_award”....
         // 去把这个 ruleModels 这个名字作为 树名treeId 去查找 一个规则树对象
         RuleTreeVO ruleTreeVO = repository.queryRuleTreeVOByTreeId(strategyAwardRuleModelVO.getRuleModels());
         if(null == ruleTreeVO) {
-            // 也就是说，当我们在 strategy_award 表中找到了 ruleModel（“rule_lock”,“rule_luck_award”....）
+            // 也就是说，当我们在 strategy_award 表中找到了 ruleModel（“tree_lock”,“tree_luck_award”....）
             // 但是 rule_tree 表中并没有对应的树，要抛个异常
             throw new RuntimeException("存在抽奖策略配置的规则模型 Key，未在库表 rule_tree、rule_tree_node、rule_tree_line 配置对应的规则树信息 " + strategyAwardRuleModelVO.getRuleModels());
         }

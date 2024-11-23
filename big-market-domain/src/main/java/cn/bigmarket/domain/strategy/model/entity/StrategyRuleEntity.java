@@ -38,6 +38,9 @@ public class StrategyRuleEntity {
     /**
      * 获取权重值
      * 数据案例；4000:102,103,104,105 5000:102,103,104,105,106,107 6000:102,103,104,105,106,107,108,109
+     * 返回的是：<4000, [102, 103, 104, 105]>
+     *          <5000, [102, 103, 104, 105, 106, 107]>
+     *          <6000, [102, 103, 104, 105, 106, 107, 108, 109]>
      */
     public Map<String, List<Integer>> getRuleWeightValues() {
         if (!"rule_weight".equals(ruleModel)) return null;

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *  Response 接口回应

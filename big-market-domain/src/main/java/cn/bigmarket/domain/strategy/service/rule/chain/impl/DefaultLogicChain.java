@@ -17,8 +17,6 @@ public class DefaultLogicChain extends AbstractLogicChain {
 
     @Resource
     protected IStrategyDispatch strategyDispatch;
-
-
     /**
      * 默认的责任链「作为最后一个链」，走兜底
      *
@@ -32,7 +30,6 @@ public class DefaultLogicChain extends AbstractLogicChain {
                 .logicModel(ruleModels())
                 .build();
     }
-
     @Override
     protected String ruleModels() {
         return DefaultChainFactory.LogicModel.RULE_DEFAULT.getCode();
