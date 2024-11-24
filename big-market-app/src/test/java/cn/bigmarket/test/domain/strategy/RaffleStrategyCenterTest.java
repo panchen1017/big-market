@@ -1,11 +1,9 @@
-package cn.bigmarket.test.domain;
+package cn.bigmarket.test.domain.strategy;
 
 import cn.bigmarket.domain.strategy.model.entity.RaffleAwardEntity;
 import cn.bigmarket.domain.strategy.model.entity.RaffleFactorEntity;
 import cn.bigmarket.domain.strategy.service.IRaffleStrategy;
 import cn.bigmarket.domain.strategy.service.armory.IStrategyArmory;
-import cn.bigmarket.domain.strategy.service.rule.chain.impl.RuleWeightLogicChain;
-import cn.bigmarket.domain.strategy.service.rule.tree.impl.RuleLockLogicTreeNode;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -16,7 +14,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.annotation.Resource;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * @author Fuzhengwei bugstack.cn @小傅哥
@@ -26,43 +23,37 @@ import java.util.concurrent.CountDownLatch;
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class RaffleStrategyTest {
+public class RaffleStrategyCenterTest {
 
     @Resource
     private IStrategyArmory strategyArmory;
     @Resource
     private IRaffleStrategy raffleStrategy;
-    @Resource
-    private RuleWeightLogicChain ruleWeightLogicChain;
-    @Resource
-    private RuleLockLogicTreeNode ruleLockLogicTreeNode;
+
 
     @Before
     public void setUp() {
         // 策略装配 100001、100002、100003
-        log.info("抽奖装配测试结果：{}", strategyArmory.assembleLotteryStrategy(100006L));
+        log.info("测试结果：{}", strategyArmory.assembleLotteryStrategy(100001L));
+//        log.info("测试结果：{}", strategyArmory.assembleLotteryStrategy(100002L));
+        log.info("测试结果：{}", strategyArmory.assembleLotteryStrategy(100003L));
 
         // 通过反射 mock 规则中的值
-        ReflectionTestUtils.setField(ruleWeightLogicChain, "userScore", 3900L);
-        ReflectionTestUtils.setField(ruleLockLogicTreeNode, "userRaffleCount", 10L);
+//        ReflectionTestUtils.setField(ruleWeightLogicFilter, "userScore", 40500L);
+//        ReflectionTestUtils.setField(ruleLockLogicFilter, "userRaffleCount", 10L);
     }
 
     @Test
-    public void test_performRaffle() throws InterruptedException {
+    public void test_performRaffle() {
+        RaffleFactorEntity raffleFactorEntity = RaffleFactorEntity.builder()
+                .userId("xiaofuge")
+                .strategyId(100001L)
+                .build();
 
-        for (int i = 0; i < 3; i++) {
-            log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            RaffleFactorEntity raffleFactorEntity = RaffleFactorEntity.builder()
-                    .userId("xiaofuge")
-                    .strategyId(100006L)
-                    .build();
+        RaffleAwardEntity raffleAwardEntity = raffleStrategy.performRaffle(raffleFactorEntity);
 
-            RaffleAwardEntity raffleAwardEntity = raffleStrategy.performRaffle(raffleFactorEntity);
-
-            log.info("请求参数：{}", JSON.toJSONString(raffleFactorEntity));
-            log.info("测试结果：{}", JSON.toJSONString(raffleAwardEntity));
-        }
-        new CountDownLatch(1).await();
+        log.info("请求参数：{}", JSON.toJSONString(raffleFactorEntity));
+        log.info("测试结果：{}", JSON.toJSONString(raffleAwardEntity));
     }
 
     @Test

@@ -1,4 +1,4 @@
-package cn.bigmarket.test.domain;
+package cn.bigmarket.test.domain.strategy;
 
 import cn.bigmarket.domain.strategy.model.valobj.*;
 import cn.bigmarket.domain.strategy.service.rule.tree.factory.engine.IDecisionTreeEngine;
