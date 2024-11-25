@@ -1,5 +1,6 @@
 package cn.bigmarket.domain.activity.repository;
 
+import cn.bigmarket.domain.activity.model.aggregate.CreateOrderAggregate;
 import cn.bigmarket.domain.activity.model.entity.ActivityCountEntity;
 import cn.bigmarket.domain.activity.model.entity.ActivityEntity;
 import cn.bigmarket.domain.activity.model.entity.ActivitySkuEntity;
@@ -17,4 +18,5 @@ public interface IActivityRepository {
 
     ActivityCountEntity queryRaffleActivityCountByActivityCountId(Long activityCountId);
 
+    void doSaveOrder(CreateOrderAggregate createOrderAggregate);
 }
