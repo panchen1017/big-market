@@ -1,4 +1,4 @@
-package cn.bigmarket.domain.activity.service.rule.impl;
+package cn.bigmarket.domain.activity.service.quota.rule.impl;
 
 import cn.bigmarket.domain.activity.model.entity.ActivityCountEntity;
 import cn.bigmarket.domain.activity.model.entity.ActivityEntity;
@@ -6,7 +6,7 @@ import cn.bigmarket.domain.activity.model.entity.ActivitySkuEntity;
 import cn.bigmarket.domain.activity.model.valobj.ActivitySkuStockKeyVO;
 import cn.bigmarket.domain.activity.repository.IActivityRepository;
 import cn.bigmarket.domain.activity.service.armory.IActivityDispatch;
-import cn.bigmarket.domain.activity.service.rule.AbstractActionChain;
+import cn.bigmarket.domain.activity.service.quota.rule.AbstractActionChain;
 import cn.bigmarket.types.enums.ResponseCode;
 import cn.bigmarket.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;

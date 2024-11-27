@@ -1,21 +1,21 @@
-package cn.bigmarket.domain.activity.service;
+package cn.bigmarket.domain.activity.service.quota;
 
 import cn.bigmarket.domain.activity.model.entity.ActivityCountEntity;
 import cn.bigmarket.domain.activity.model.entity.ActivityEntity;
 import cn.bigmarket.domain.activity.model.entity.ActivitySkuEntity;
 import cn.bigmarket.domain.activity.repository.IActivityRepository;
-import cn.bigmarket.domain.activity.service.rule.factory.DefaultActivityChainFactory;
+import cn.bigmarket.domain.activity.service.quota.rule.factory.DefaultActivityChainFactory;
 
 /**
  * 抽奖活动的支撑类（都是一些查询信息的步骤）
  *
  */
-public class RaffleActivitySupport {
+public class RaffleActivityAccountQuotaSupport {
 
     protected DefaultActivityChainFactory defaultActivityChainFactory;
     protected IActivityRepository activityRepository;
 
-    public RaffleActivitySupport(DefaultActivityChainFactory defaultActivityChainFactory, IActivityRepository activityRepository) {
+    public RaffleActivityAccountQuotaSupport(DefaultActivityChainFactory defaultActivityChainFactory, IActivityRepository activityRepository) {
         this.defaultActivityChainFactory = defaultActivityChainFactory;
         this.activityRepository = activityRepository;
     }

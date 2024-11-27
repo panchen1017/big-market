@@ -1,6 +1,7 @@
 package cn.bigmarket.infrastructure.persistent.dao;
 
 import cn.bigmarket.infrastructure.persistent.po.RaffleActivityAccount;
+import cn.bugstack.middleware.db.router.annotation.DBRouter;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -13,4 +14,12 @@ public interface IRaffleActivityAccountDao {
     int updateAccountQuota(RaffleActivityAccount raffleActivityAccount);
 
     void insert(RaffleActivityAccount raffleActivityAccount);
+    int updateActivityAccountSubtractionQuota(RaffleActivityAccount raffleActivityAccount);
+    void updateActivityAccountMonthSurplusImageQuota(RaffleActivityAccount raffleActivityAccount);
+
+    void updateActivityAccountDaySurplusImageQuota(RaffleActivityAccount raffleActivityAccount);
+
+    @DBRouter
+    RaffleActivityAccount queryActivityAccountByUserId(RaffleActivityAccount raffleActivityAccountReq);
+
 }

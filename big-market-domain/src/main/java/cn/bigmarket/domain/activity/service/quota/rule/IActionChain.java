@@ -1,4 +1,4 @@
-package cn.bigmarket.domain.activity.service.rule;
+package cn.bigmarket.domain.activity.service.quota.rule;
 
 import cn.bigmarket.domain.activity.model.entity.ActivityCountEntity;
 import cn.bigmarket.domain.activity.model.entity.ActivityEntity;

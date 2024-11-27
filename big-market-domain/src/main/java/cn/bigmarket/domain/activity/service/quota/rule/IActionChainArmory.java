@@ -1,4 +1,4 @@
-package cn.bigmarket.domain.activity.service.rule;
+package cn.bigmarket.domain.activity.service.quota.rule;
 
 /**
  * @author Fuzhengwei bugstack.cn @小傅哥

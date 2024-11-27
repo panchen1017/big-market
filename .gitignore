@@ -42,3 +42,8 @@ build/
 /docs/dev-ops/mysql/sql/big_market.sql
 /docs/dev-ops/mysql/sql/big_market_01.sql
 /docs/dev-ops/mysql/sql/big_market_02.sql
+/docs/dev-ops/app/stop.sh
+/docs/dev-ops/app/start.sh
+/docs/dev-ops/docker-compose-app.yml
+/docs/dev-ops/docker-compose-environment.yml
+/docs/dev-ops/mysql/sql/xfg-frame-archetype.sql

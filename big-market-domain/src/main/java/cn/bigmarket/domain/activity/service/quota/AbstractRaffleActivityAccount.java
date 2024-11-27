@@ -1,10 +1,11 @@
-package cn.bigmarket.domain.activity.service;
+package cn.bigmarket.domain.activity.service.quota;
 
-import cn.bigmarket.domain.activity.model.aggregate.CreateOrderAggregate;
+import cn.bigmarket.domain.activity.model.aggregate.CreateQuotaOrderAggregate;
 import cn.bigmarket.domain.activity.model.entity.*;
 import cn.bigmarket.domain.activity.repository.IActivityRepository;
-import cn.bigmarket.domain.activity.service.rule.IActionChain;
-import cn.bigmarket.domain.activity.service.rule.factory.DefaultActivityChainFactory;
+import cn.bigmarket.domain.activity.service.IRaffleActivityAccountQuotaService;
+import cn.bigmarket.domain.activity.service.quota.rule.IActionChain;
+import cn.bigmarket.domain.activity.service.quota.rule.factory.DefaultActivityChainFactory;
 import cn.bigmarket.types.enums.ResponseCode;
 import cn.bigmarket.types.exception.AppException;
 import com.alibaba.fastjson.JSON;
@@ -17,30 +18,30 @@ import org.apache.commons.lang3.StringUtils;
  * @create 2024-03-16 08:42
  */
 @Slf4j
-public abstract class AbstractRaffleActivity extends RaffleActivitySupport implements IRaffleOrder {
+public abstract class AbstractRaffleActivityAccount extends RaffleActivityAccountQuotaSupport implements IRaffleActivityAccountQuotaService {
 
 
-    public AbstractRaffleActivity(DefaultActivityChainFactory defaultActivityChainFactory, IActivityRepository activityRepository) {
+    public AbstractRaffleActivityAccount(DefaultActivityChainFactory defaultActivityChainFactory, IActivityRepository activityRepository) {
         super(defaultActivityChainFactory, activityRepository);
     }
 
+//    @Override
+//    public ActivityOrderEntity createRaffleActivityOrder(ActivityShopCartEntity activityShopCartEntity) {
+//        // activityShopCartEntity 包括 userId 和 sku
+//        // 1. 通过sku查询活动信息（通过用户id和sku获取raffle_activity_sku表中的数据）
+//        ActivitySkuEntity activitySkuEntity = activityRepository.queryActivitySku(activityShopCartEntity.getSku());
+//        // 2. 查询活动信息（通过刚刚的raffle_activity_sku表中的 activityId 数据 获取 raffle_activity 表中数据）
+//        ActivityEntity activityEntity = activityRepository.queryRaffleActivityByActivityId(activitySkuEntity.getActivityId());
+//        // 3. 查询次数信息（用户在活动上可参与的次数，通过刚刚的raffle_activity_sku表中的 activityCountId 数据 获取 RaffleActivityCount 表中数据）
+//        ActivityCountEntity activityCountEntity = activityRepository.queryRaffleActivityCountByActivityCountId(activitySkuEntity.getActivityCountId());
+//
+//        log.info("查询结果：{} {} {}", JSON.toJSONString(activitySkuEntity), JSON.toJSONString(activityEntity), JSON.toJSONString(activityCountEntity));
+//
+//        return ActivityOrderEntity.builder().build();
+//    }
+
     @Override
-    public ActivityOrderEntity createRaffleActivityOrder(ActivityShopCartEntity activityShopCartEntity) {
-        // activityShopCartEntity 包括 userId 和 sku
-        // 1. 通过sku查询活动信息（通过用户id和sku获取raffle_activity_sku表中的数据）
-        ActivitySkuEntity activitySkuEntity = activityRepository.queryActivitySku(activityShopCartEntity.getSku());
-        // 2. 查询活动信息（通过刚刚的raffle_activity_sku表中的 activityId 数据 获取 raffle_activity 表中数据）
-        ActivityEntity activityEntity = activityRepository.queryRaffleActivityByActivityId(activitySkuEntity.getActivityId());
-        // 3. 查询次数信息（用户在活动上可参与的次数，通过刚刚的raffle_activity_sku表中的 activityCountId 数据 获取 RaffleActivityCount 表中数据）
-        ActivityCountEntity activityCountEntity = activityRepository.queryRaffleActivityCountByActivityCountId(activitySkuEntity.getActivityCountId());
-
-        log.info("查询结果：{} {} {}", JSON.toJSONString(activitySkuEntity), JSON.toJSONString(activityEntity), JSON.toJSONString(activityCountEntity));
-
-        return ActivityOrderEntity.builder().build();
-    }
-
-    @Override
-    public String createSkuRechargeOrder(SkuRechargeEntity skuRechargeEntity) {
+    public String createOrder(SkuRechargeEntity skuRechargeEntity) {
         // 1. 参数校验 （传来的 skuRechargeEntity 中的信息是否完整 userId，sku，outBusinessNo）
         String userId = skuRechargeEntity.getUserId();
         Long sku = skuRechargeEntity.getSku();
@@ -62,16 +63,16 @@ public abstract class AbstractRaffleActivity extends RaffleActivitySupport imple
         actionChain.action(activitySkuEntity, activityEntity, activityCountEntity);
 
         // 4. 构建订单聚合对象（模版模式，子类具体实现）
-        CreateOrderAggregate createOrderAggregate = buildOrderAggreagate(skuRechargeEntity, activitySkuEntity, activityEntity, activityCountEntity);
+        CreateQuotaOrderAggregate createOrderAggregate = buildOrderAggreagate(skuRechargeEntity, activitySkuEntity, activityEntity, activityCountEntity);
         // 5. 保存订单
         doSaveOrder(createOrderAggregate);
         // 6. 返回单号
         return createOrderAggregate.getActivityOrderEntity().getOrderId();
     }
 
-    protected abstract void doSaveOrder(CreateOrderAggregate createOrderAggregate);
+    protected abstract void doSaveOrder(CreateQuotaOrderAggregate createOrderAggregate);
 
-    protected abstract CreateOrderAggregate buildOrderAggreagate(SkuRechargeEntity skuRechargeEntity, ActivitySkuEntity activitySkuEntity, ActivityEntity activityEntity, ActivityCountEntity activityCountEntity);
+    protected abstract CreateQuotaOrderAggregate buildOrderAggreagate(SkuRechargeEntity skuRechargeEntity, ActivitySkuEntity activitySkuEntity, ActivityEntity activityEntity, ActivityCountEntity activityCountEntity);
 
 
 }

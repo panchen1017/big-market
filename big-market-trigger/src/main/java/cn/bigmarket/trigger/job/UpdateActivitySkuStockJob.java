@@ -1,7 +1,7 @@
 package cn.bigmarket.trigger.job;
 
 import cn.bigmarket.domain.activity.model.valobj.ActivitySkuStockKeyVO;
-import cn.bigmarket.domain.activity.service.ISkuStock;
+import cn.bigmarket.domain.activity.service.IRaffleActivitySkuStockService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ import javax.annotation.Resource;
 public class UpdateActivitySkuStockJob {
 
     @Resource
-    private ISkuStock skuStock;
+    private IRaffleActivitySkuStockService skuStock;
 
     @Scheduled(cron = "0/5 * * * * ?")
     public void exec() {
