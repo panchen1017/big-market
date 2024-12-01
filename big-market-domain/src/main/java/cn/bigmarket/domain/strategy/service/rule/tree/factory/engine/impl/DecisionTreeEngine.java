@@ -9,6 +9,7 @@ import cn.bigmarket.domain.strategy.service.rule.tree.factory.DefaultTreeFactory
 import cn.bigmarket.domain.strategy.service.rule.tree.factory.engine.IDecisionTreeEngine;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
     }
 
     @Override
-    public DefaultTreeFactory.StrategyAwardVO process(String userId, Long strategyId, Integer awardId) {
+    public DefaultTreeFactory.StrategyAwardVO process(String userId, Long strategyId, Integer awardId, Date endDateTime) {
 
         // process方法 就是去处理二叉树当中的走向
         // 首先，创建一个要返回的对象
@@ -52,7 +53,7 @@ public class DecisionTreeEngine implements IDecisionTreeEngine {
 
             // 2. 决策节点计算
             // 根据 logicTreeNode（"rule_stock"，"rule_luck_award"，"rule_lock"）去过对应的逻辑 logic
-            DefaultTreeFactory.TreeActionEntity logicEntity = logicTreeNode.logic(userId, strategyId, awardId, ruleTreeNode.getRuleValue());
+            DefaultTreeFactory.TreeActionEntity logicEntity = logicTreeNode.logic(userId, strategyId, awardId, ruleTreeNode.getRuleValue(), endDateTime);
             // 获取 logicEntity 的结果（"TAKE_OVER" / "ALLOW"）
             // ruleLogicCheckTypeVO：是否能走到下一个节点的信息
             // strategyAwardData：当前对象的数据信息

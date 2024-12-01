@@ -18,10 +18,7 @@ import org.redisson.api.RMap;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static cn.bigmarket.types.enums.ResponseCode.UN_ASSEMBLED_STRATEGY_ARMORY;
@@ -85,6 +82,7 @@ public class StrategyRepository implements IStrategyRepository {
                         .awardCount(strategyAward.getAwardCount())
                         .awardCountSurplus(strategyAward.getAwardCountSurplus())
                         .awardRate(strategyAward.getAwardRate())
+                        .ruleModels(strategyAward.getRuleModels())
                         .build();
             awardEntities.add(strategyAwardEntity);
         }
@@ -265,6 +263,11 @@ public class StrategyRepository implements IStrategyRepository {
 
     @Override
     public Boolean  subtractionAwardStock(String cacheKey) {
+        return subtractionAwardStock(cacheKey, null);
+    }
+
+    @Override
+    public Boolean subtractionAwardStock(String cacheKey, Date endDateTime) {
         // surplus 指的是当前剩余库存数量减一之后的数量
         long surplus = redisService.decr(cacheKey);
         if(surplus < 0) {
@@ -279,11 +282,18 @@ public class StrategyRepository implements IStrategyRepository {
         // 其中 key 是要设置的键名，value 是要设置的值。
         // 如果键 key 不存在，则将键 key 的值设置为 value，并返回 1 表示设置成功。如果键 key 已经存在，则不进行任何操作，返回 0 表示设置失败
 
-        Boolean lock = redisService.setNx(lockKey);
-        // 如果加锁不成功的话，就会返回一个日志
-        if(!lock) {
+        Boolean lock = false;
+        if (null != endDateTime) {
+            // 如果 非空，要加一个endDateTime + 1天的操作
+            long expireMillis = endDateTime.getTime() - System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
+            lock = redisService.setNx(lockKey, expireMillis, TimeUnit.MILLISECONDS);
+        } else {
+            lock = redisService.setNx(lockKey);
+        }
+        if (!lock) {
             log.info("策略奖品库存加锁失败 {}", lockKey);
         }
+
         return lock;
     }
 
@@ -361,6 +371,19 @@ public class StrategyRepository implements IStrategyRepository {
         if (null == raffleActivityAccountDay) return 0;
         // 总次数 - 剩余的，等于今日参与的
         return raffleActivityAccountDay.getDayCount() - raffleActivityAccountDay.getDayCountSurplus();
+    }
+
+    @Override
+    public Map<String, Integer> queryAwardRuleLockCount(String[] treeIds) {
+        if (null == treeIds || treeIds.length == 0) return new HashMap<>();
+        List<RuleTreeNode> ruleTreeNodes = ruleTreeNodeDao.queryRuleLocks(treeIds);
+        Map<String, Integer> resultMap = new HashMap<>();
+        for (RuleTreeNode node : ruleTreeNodes) {
+            String treeId = node.getTreeId();
+            Integer ruleValue = Integer.valueOf(node.getRuleValue());
+            resultMap.put(treeId, ruleValue);
+        }
+        return resultMap;
     }
 
 }
