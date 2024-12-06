@@ -3,6 +3,8 @@ package cn.bigmarket.test.trigger;
 import cn.bigmarket.trigger.api.IRaffleActivityService;
 import cn.bigmarket.trigger.api.dto.ActivityDrawRequestDTO;
 import cn.bigmarket.trigger.api.dto.ActivityDrawResponseDTO;
+import cn.bigmarket.trigger.api.dto.UserActivityAccountRequestDTO;
+import cn.bigmarket.trigger.api.dto.UserActivityAccountResponseDTO;
 import cn.bigmarket.types.model.Response;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -34,10 +36,37 @@ public class RaffleActivityControllerTest {
 
     @Test
     public void test_draw() {
-        ActivityDrawRequestDTO request = new ActivityDrawRequestDTO();
+        for (int i = 0; i < 1; i++) {
+            ActivityDrawRequestDTO request = new ActivityDrawRequestDTO();
+            request.setActivityId(100301L);
+            request.setUserId("xiaofuge");
+            Response<ActivityDrawResponseDTO> response = raffleActivityService.draw(request);
+
+            log.info("请求参数：{}", JSON.toJSONString(request));
+            log.info("测试结果：{}", JSON.toJSONString(response));
+        }
+    }
+
+    @Test
+    public void test_calendarSignRebate() {
+        Response<Boolean> response = raffleActivityService.calendarSignRebate("xiaofuge111");
+        log.info("测试结果：{}", JSON.toJSONString(response));
+    }
+
+    @Test
+    public void test_isCalendarSignRebate() {
+        Response<Boolean> response = raffleActivityService.isCalendarSignRebate("xiaofuge");
+        log.info("测试结果：{}", JSON.toJSONString(response));
+    }
+
+    @Test
+    public void test_queryUserActivityAccount() {
+        UserActivityAccountRequestDTO request = new UserActivityAccountRequestDTO();
         request.setActivityId(100301L);
-        request.setUserId("xiaofuge");
-        Response<ActivityDrawResponseDTO> response = raffleActivityService.draw(request);
+        request.setUserId("xiaofuge111");
+
+        // 查询数据
+        Response<UserActivityAccountResponseDTO> response = raffleActivityService.queryUserActivityAccount(request);
 
         log.info("请求参数：{}", JSON.toJSONString(request));
         log.info("测试结果：{}", JSON.toJSONString(response));

@@ -1,6 +1,7 @@
 package cn.bigmarket.domain.rebate.repository;
 
 import cn.bigmarket.domain.rebate.model.aggregate.BehaviorRebateAggregate;
+import cn.bigmarket.domain.rebate.model.entity.BehaviorRebateOrderEntity;
 import cn.bigmarket.domain.rebate.model.valobj.BehaviorTypeVO;
 import cn.bigmarket.domain.rebate.model.valobj.DailyBehaviorRebateVO;
 
@@ -17,4 +18,5 @@ public interface IBehaviorRebateRepository {
 
     void saveUserRebateRecord(String userId, List<BehaviorRebateAggregate> behaviorRebateAggregates);
 
+    List<BehaviorRebateOrderEntity> queryOrderByOutBusinessNo(String userId, String outBusinessNo);
 }

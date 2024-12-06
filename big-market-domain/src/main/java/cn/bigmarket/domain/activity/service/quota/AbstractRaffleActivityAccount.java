@@ -25,20 +25,6 @@ public abstract class AbstractRaffleActivityAccount extends RaffleActivityAccoun
         super(defaultActivityChainFactory, activityRepository);
     }
 
-//    @Override
-//    public ActivityOrderEntity createRaffleActivityOrder(ActivityShopCartEntity activityShopCartEntity) {
-//        // activityShopCartEntity 包括 userId 和 sku
-//        // 1. 通过sku查询活动信息（通过用户id和sku获取raffle_activity_sku表中的数据）
-//        ActivitySkuEntity activitySkuEntity = activityRepository.queryActivitySku(activityShopCartEntity.getSku());
-//        // 2. 查询活动信息（通过刚刚的raffle_activity_sku表中的 activityId 数据 获取 raffle_activity 表中数据）
-//        ActivityEntity activityEntity = activityRepository.queryRaffleActivityByActivityId(activitySkuEntity.getActivityId());
-//        // 3. 查询次数信息（用户在活动上可参与的次数，通过刚刚的raffle_activity_sku表中的 activityCountId 数据 获取 RaffleActivityCount 表中数据）
-//        ActivityCountEntity activityCountEntity = activityRepository.queryRaffleActivityCountByActivityCountId(activitySkuEntity.getActivityCountId());
-//
-//        log.info("查询结果：{} {} {}", JSON.toJSONString(activitySkuEntity), JSON.toJSONString(activityEntity), JSON.toJSONString(activityCountEntity));
-//
-//        return ActivityOrderEntity.builder().build();
-//    }
 
     @Override
     public String createOrder(SkuRechargeEntity skuRechargeEntity) {
@@ -69,6 +55,8 @@ public abstract class AbstractRaffleActivityAccount extends RaffleActivityAccoun
         // 6. 返回单号
         return createOrderAggregate.getActivityOrderEntity().getOrderId();
     }
+
+
 
     protected abstract void doSaveOrder(CreateQuotaOrderAggregate createOrderAggregate);
 

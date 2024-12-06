@@ -3,6 +3,7 @@ package cn.bigmarket.domain.strategy.service.raffle;
 
 import cn.bigmarket.domain.strategy.model.entity.StrategyAwardEntity;
 import cn.bigmarket.domain.strategy.model.valobj.RuleTreeVO;
+import cn.bigmarket.domain.strategy.model.valobj.RuleWeightVO;
 import cn.bigmarket.domain.strategy.model.valobj.StrategyAwardRuleModelVO;
 import cn.bigmarket.domain.strategy.model.valobj.StrategyAwardStockKeyVO;
 import cn.bigmarket.domain.strategy.repository.IStrategyRepository;
@@ -88,6 +89,7 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy implements IRa
 
     @Override
     public List<StrategyAwardEntity> queryRaffleStrategyAwardListByActivityId(Long activityId) {
+        // 通过活动id，查到策略id，在通过策略id查询策略-奖品表的实体数据
         Long strategyId = repository.queryStrategyIdByActivityId(activityId);
         return queryRaffleStrategyAwardList(strategyId);
     }
@@ -95,5 +97,14 @@ public class DefaultRaffleStrategy extends AbstractRaffleStrategy implements IRa
     @Override
     public Map<String, Integer> queryAwardRuleLockCount(String[] treeIds) {
         return repository.queryAwardRuleLockCount(treeIds);
+    }
+    @Override
+    public List<RuleWeightVO> queryAwardRuleWeight(Long strategyId) {
+        return repository.queryAwardRuleWeight(strategyId);
+    }
+    @Override
+    public List<RuleWeightVO> queryAwardRuleWeightByActivityId(Long activityId) {
+        Long strategyId = repository.queryStrategyIdByActivityId(activityId);
+        return queryAwardRuleWeight(strategyId);
     }
 }

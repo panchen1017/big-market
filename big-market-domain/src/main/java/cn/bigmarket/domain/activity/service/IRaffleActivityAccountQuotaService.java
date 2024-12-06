@@ -1,5 +1,6 @@
 package cn.bigmarket.domain.activity.service;
 
+import cn.bigmarket.domain.activity.model.entity.ActivityAccountEntity;
 import cn.bigmarket.domain.activity.model.entity.ActivityOrderEntity;
 import cn.bigmarket.domain.activity.model.entity.ActivityShopCartEntity;
 import cn.bigmarket.domain.activity.model.entity.SkuRechargeEntity;
@@ -29,4 +30,22 @@ public interface IRaffleActivityAccountQuotaService {
      * @return 参与次数
      */
     Integer queryRaffleActivityAccountDayPartakeCount(Long activityId, String userId);
+
+    /**
+     * 查询活动账户额度「总、月、日」
+     *
+     * @param activityId 活动ID
+     * @param userId     用户ID
+     * @return 账户实体
+     */
+    ActivityAccountEntity queryActivityAccountEntity(Long activityId, String userId);
+
+    /**
+     * 查询活动账户 - 总，参与次数
+     *
+     * @param activityId 活动ID
+     * @param userId     用户ID
+     * @return 参与次数
+     */
+    Integer queryRaffleActivityAccountPartakeCount(Long activityId, String userId);
 }
