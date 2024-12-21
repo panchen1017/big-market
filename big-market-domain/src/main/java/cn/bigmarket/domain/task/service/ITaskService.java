@@ -12,7 +12,7 @@ import java.util.List;
 public interface ITaskService {
 
     /**
-     * 查询发送MQ失败和超时1分钟未发送的MQ
+     * 查询发送MQ失败和超时 1 分钟未发送的MQ
      *
      * @return 未发送的任务消息列表10条
      */

@@ -56,6 +56,12 @@ public abstract class AbstractRaffleActivityPartake implements IRaffleActivityPa
         }
 
         // 2. 查询未被使用的活动参与订单记录（创建了状态为“created”，但是没有使用，并且在有效期之内）
+        /**
+         *      查看 activity_order 表，看看有没有没有使用完的抽奖次数
+         *      有时候生成流水表，和后续执行抽奖动作，不是一个完整的事务，
+         *      可能在用户参与订单流水之后，系统崩溃了，并没有走到抽奖和发奖的逻辑，
+         *      所以这边不去扣减用户抽奖次数，所以这边就会存在未消费的 “活动订单”（状态为 “create”）
+         */
         UserRaffleOrderEntity userRaffleOrderEntity = activityRepository.queryNoUsedRaffleOrder(partakeRaffleActivityEntity);
         if (null != userRaffleOrderEntity) {
             log.info("创建参与活动订单[已存在未消费] userId:{} activityId:{} userRaffleOrderEntity:{}", userId, activityId, JSON.toJSONString(userRaffleOrderEntity));

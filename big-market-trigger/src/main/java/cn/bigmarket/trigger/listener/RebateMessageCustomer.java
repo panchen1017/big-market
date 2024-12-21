@@ -34,6 +34,10 @@ public class RebateMessageCustomer {
     @RabbitListener(queuesToDeclare = @Queue(value = "${spring.rabbitmq.topic.send_rebate}"))
     public void listener(String message) {
         try {
+            /**
+             *  rebate，返利，签到返利，
+             *  这边就是返利，签到返利。
+             */
             log.info("监听用户行为返利消息 topic: {} message: {}", topic, message);
             // 1. 转换消息
             BaseEvent.EventMessage<SendRebateMessageEvent.RebateMessage> eventMessage = JSON.parseObject(message, new TypeReference<BaseEvent.EventMessage<SendRebateMessageEvent.RebateMessage>>() {

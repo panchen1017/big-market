@@ -10,7 +10,7 @@ import javax.annotation.Resource;
 
 /**
  * @author Fuzhengwei bugstack.cn @小傅哥
- * @description 更新活动sku库存任务
+ * @description 更新活动 sku 库存任务
  * @create 2024-03-30 09:52
  */
 @Slf4j

@@ -28,6 +28,9 @@ public abstract class AbstractRaffleActivityAccount extends RaffleActivityAccoun
 
     @Override
     public String createOrder(SkuRechargeEntity skuRechargeEntity) {
+        /**
+         * 做 sku 扣减
+         */
         // 1. 参数校验 （传来的 skuRechargeEntity 中的信息是否完整 userId，sku，outBusinessNo）
         String userId = skuRechargeEntity.getUserId();
         Long sku = skuRechargeEntity.getSku();

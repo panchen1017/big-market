@@ -32,6 +32,7 @@ public class AwardService implements IAwardService {
         sendAwardMessage.setAwardId(userAwardRecordEntity.getAwardId());
         sendAwardMessage.setAwardTitle(userAwardRecordEntity.getAwardTitle());
 
+        // 这里的 topic 是 spring.rabbitmq.topic.send_award
         BaseEvent.EventMessage<SendAwardMessageEvent.SendAwardMessage> sendAwardMessageEventMessage = sendAwardMessageEvent.buildEventMessage(sendAwardMessage);
 
         // 构建任务对象

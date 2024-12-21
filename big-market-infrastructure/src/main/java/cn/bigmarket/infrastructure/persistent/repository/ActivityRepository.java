@@ -118,6 +118,9 @@ public class ActivityRepository implements IActivityRepository {
     @Override
     public void doSaveOrder(CreateQuotaOrderAggregate createOrderAggregate) {
         try {
+            /**
+             * 给用户配抽奖次数额，写入数据库（总，日，月）表 raffleActivityOrder
+             */
             // 订单对象
             ActivityOrderEntity activityOrderEntity = createOrderAggregate.getActivityOrderEntity();
             RaffleActivityOrder raffleActivityOrder = new RaffleActivityOrder();
@@ -203,7 +206,7 @@ public class ActivityRepository implements IActivityRepository {
         if (surplus == 0) {
             // 库存消耗没了以后，发送MQ消息，更新数据库库存
             eventPublisher.publish(activitySkuStockZeroMessageEvent.topic(), activitySkuStockZeroMessageEvent.buildEventMessage(sku));
-            return false;
+//            return false;
         } else if (surplus < 0) {
             // 库存小于0，恢复为0个
             redisService.setAtomicLong(cacheKey, 0);
@@ -257,6 +260,10 @@ public class ActivityRepository implements IActivityRepository {
             Long activityId = createPartakeOrderAggregate.getActivityId();
             /**
              * 活动账户，月账户，日账户，订单表
+             * 对总账户，日账户，月账户，进行减一的操作
+             * raffle_activity_account
+             * raffle_activity_account_day
+             * raffle_activity_account_month
              */
             ActivityAccountEntity activityAccountEntity = createPartakeOrderAggregate.getActivityAccountEntity();
             ActivityAccountMonthEntity activityAccountMonthEntity = createPartakeOrderAggregate.getActivityAccountMonthEntity();
@@ -339,6 +346,9 @@ public class ActivityRepository implements IActivityRepository {
                     }
 
                     // 4. 写入参与活动订单
+                    /**
+                     * 表明，用户真正意义上使用了这个抽奖次数了，因为上面都一个在总日月账户上面扣减了
+                     */
                     userRaffleOrderDao.insert(UserRaffleOrder.builder()
                             .userId(userRaffleOrderEntity.getUserId())
                             .activityId(userRaffleOrderEntity.getActivityId())

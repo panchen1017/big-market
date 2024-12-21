@@ -127,6 +127,9 @@ public class RaffleActivityController implements IRaffleActivityService {
                 throw new AppException(ResponseCode.ILLEGAL_PARAMETER.getCode(), ResponseCode.ILLEGAL_PARAMETER.getInfo());
             }
             // 2. 参与活动 - 创建参与记录订单
+            /**
+             * 表明用户使用了一个抽奖次数
+             */
             UserRaffleOrderEntity orderEntity = raffleActivityPartakeService.createOrder(request.getUserId(), request.getActivityId());
             log.info("活动抽奖，创建订单 userId:{} activityId:{} orderId:{}", request.getUserId(), request.getActivityId(), orderEntity.getOrderId());
 

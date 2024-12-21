@@ -69,6 +69,12 @@ public class BehaviorRebateRepository implements IBehaviorRebateRepository {
             dbRouter.doRouter(userId);
             transactionTemplate.execute(status -> {
                 try {
+                    /**
+                     * 编程式事务控制
+                     *
+                     * 写流水表 userBehaviorRebateOrder
+                     * 写Task表
+                     */
                     for (BehaviorRebateAggregate behaviorRebateAggregate : behaviorRebateAggregates) {
                         BehaviorRebateOrderEntity behaviorRebateOrderEntity = behaviorRebateAggregate.getBehaviorRebateOrderEntity();
                         // 用户行为返利订单对象
@@ -114,9 +120,16 @@ public class BehaviorRebateRepository implements IBehaviorRebateRepository {
                 // 发送消息【在事务外执行，如果失败还有任务补偿】
                 eventPublisher.publish(taskEntity.getTopic(), taskEntity.getMessage());
                 // 更新数据库记录，task 任务表
+                /**
+                 *   task表的作用就是看这个记录有没有成功的发送到 mq 中
+                 */
                 taskDao.updateTaskSendMessageCompleted(task);
             } catch (Exception e) {
                 log.error("写入返利记录，发送MQ消息失败 userId: {} topic: {}", userId, task.getTopic());
+                /**
+                 * 如果发送 MQ失败 / 更新数据库失败，把这边的 Task 表set为fail
+                 * 然后 Task 有个定时任务，每五秒钟去更新 Task 表
+                 */
                 taskDao.updateTaskSendMessageFail(task);
             }
         }

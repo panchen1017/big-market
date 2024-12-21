@@ -32,6 +32,9 @@ public class BehaviorRebateService implements IBehaviorRebateService {
 
     @Override
     public List<String> createOrder(BehaviorEntity behaviorEntity) {
+        /**
+         * 创建入库信息，user_behavior_rebate_order表
+         */
         // 1. 查询返利配置
         List<DailyBehaviorRebateVO> dailyBehaviorRebateVOS = behaviorRebateRepository.queryDailyBehaviorRebateConfig(behaviorEntity.getBehaviorTypeVO());
         if (null == dailyBehaviorRebateVOS || dailyBehaviorRebateVOS.isEmpty()) return new ArrayList<>();
@@ -73,6 +76,12 @@ public class BehaviorRebateService implements IBehaviorRebateService {
             taskEntity.setMessage(rebateMessageEventMessage);
             taskEntity.setState(TaskStateVO.create);
 
+            /**
+             *  BehaviorRebateAggregate 聚合对象包括以下
+             *      用户ID
+             *      行为返利订单实体对象
+             *      任务实体对象 Task
+             **/
             BehaviorRebateAggregate behaviorRebateAggregate = BehaviorRebateAggregate.builder()
                         .userId(behaviorEntity.getUserId())
                         .behaviorRebateOrderEntity(behaviorRebateOrderEntity)

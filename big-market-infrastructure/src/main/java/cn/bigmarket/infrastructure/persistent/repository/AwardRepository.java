@@ -102,12 +102,22 @@ public class AwardRepository implements IAwardRepository {
         }
 
         try {
+            /**
+             * 发奖 MQ 指向 spring.rabbitmq.topic.send_award
+             */
             // 发送消息【在事务外执行，如果失败还有任务补偿】
             eventPublisher.publish(task.getTopic(), task.getMessage());
             // 更新数据库记录，task 任务表
+            /**
+             * task表的作用就是看这个记录有没有成功的发送到 mq 中
+             * 这边先去放到 mq 中去，然后存一个 Task，如果没有正确的消费，那么 Task 表每五秒去找没有正确消费的 mq ，重复消费，直到成功
+             */
             taskDao.updateTaskSendMessageCompleted(task);
         } catch (Exception e) {
             log.error("写入中奖记录，发送MQ消息失败 userId: {} topic: {}", userId, task.getTopic());
+            /**
+             * 如果 发奖失败 / 数据库更新失败，设置为发奖失败
+             */
             taskDao.updateTaskSendMessageFail(task);
         }
 
