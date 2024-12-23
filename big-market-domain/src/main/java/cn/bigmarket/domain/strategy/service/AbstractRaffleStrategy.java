@@ -58,7 +58,8 @@ public abstract class AbstractRaffleStrategy implements IRaffleStrategy{
             //  RULE_DEFAULT   ->    "默认抽奖"      默认抽奖就是，直接去调用 getRandomAward(strategyId)去奖池中去抽一个奖品（对应积分不到 4000 ）
             //  RULE_BLACKLIST ->    "黑名单抽奖"    黑名单的“101：user01，user02”已经有 awardId（101） 了
             //  RULE_WEIGHT    ->    "权重规则"      权重抽奖就是  getRandomAward(strategyId, ruleWeightValue)给定一个抽奖的范围。
-            return buildRaffleAwardEntity(strategyId, chainStrategyAwardVO.getAwardId(),null);
+            // 如果是黑名单，通过透传的方式给他传递回去
+            return buildRaffleAwardEntity(strategyId, chainStrategyAwardVO.getAwardId(),chainStrategyAwardVO.getAwardRuleValue());
         }
         /**
          * 责任链是对用户进行排除的，同时用来筛选出 strategy_rule 的，真正决定抽出什么奖品的是规则树。

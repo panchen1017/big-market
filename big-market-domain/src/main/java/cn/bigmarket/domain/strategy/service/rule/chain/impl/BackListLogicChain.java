@@ -40,6 +40,7 @@ public class BackListLogicChain extends AbstractLogicChain {
                 return DefaultChainFactory.StrategyAwardVO.builder()
                         .awardId(awardId)
                         .logicModel(ruleModels())
+                        .awardRuleValue("0.01,1")// 给一个默认的固定值，只要是黑名单，就给这么点
                         .build();
             }
         }
