@@ -21,7 +21,7 @@ public interface IActivityRepository {
 
     ActivityCountEntity queryRaffleActivityCountByActivityCountId(Long activityCountId);
 
-    void doSaveOrder(CreateQuotaOrderAggregate createOrderAggregate);
+    void doSaveNoPayOrder(CreateQuotaOrderAggregate createOrderAggregate);
 
     ActivitySkuStockKeyVO takeQueueValue();
 
@@ -55,4 +55,8 @@ public interface IActivityRepository {
 
     Integer queryRaffleActivityAccountPartakeCount(Long activityId, String userId);
 
+    void doSaveCreditPayOrder(CreateQuotaOrderAggregate createQuotaOrderAggregate);
+
+
+    void updateOrder(DeliveryOrderEntity deliveryOrderEntity);
 }

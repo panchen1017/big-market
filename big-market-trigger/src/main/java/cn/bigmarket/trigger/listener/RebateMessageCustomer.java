@@ -1,6 +1,7 @@
 package cn.bigmarket.trigger.listener;
 
 import cn.bigmarket.domain.activity.model.entity.SkuRechargeEntity;
+import cn.bigmarket.domain.activity.model.valobj.OrderTradeTypeVO;
 import cn.bigmarket.domain.activity.service.IRaffleActivityAccountQuotaService;
 import cn.bigmarket.domain.credit.model.entity.TradeEntity;
 import cn.bigmarket.domain.credit.model.valobj.TradeNameVO;
@@ -57,6 +58,7 @@ public class RebateMessageCustomer {
                     skuRechargeEntity.setUserId(rebateMessage.getUserId());
                     skuRechargeEntity.setSku(Long.valueOf(rebateMessage.getRebateConfig()));
                     skuRechargeEntity.setOutBusinessNo(rebateMessage.getBizId());
+                    skuRechargeEntity.setOrderTradeType(OrderTradeTypeVO.rebate_no_pay_trade);
                     raffleActivityAccountQuotaService.createOrder(skuRechargeEntity);
                     break;
                 case "integral":

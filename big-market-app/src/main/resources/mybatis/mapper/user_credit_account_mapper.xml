@@ -12,7 +12,7 @@
         <result column="update_time" property="updateTime"/>
     </resultMap>
 
-    <update id="updateAddAmount" parameterType="cn.bigmarket.infrastructure.persistent.po.UserAwardRecord">
+    <update id="updateAddAmount" parameterType="cn.bigmarket.infrastructure.persistent.po.UserCreditAccount">
         update user_credit_account set
         total_amount = total_amount + #{totalAmount},
         available_amount = available_amount + #{availableAmount}
